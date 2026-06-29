@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_USER: petfinder
+      POSTGRES_PASSWORD: petfinder
+      POSTGRES_DB: petfinder
+    volumes:
+      - petfinder_pg:/var/lib/postgresql/data
+
+volumes:
+  petfinder_pg:

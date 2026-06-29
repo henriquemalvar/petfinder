@@ -1,0 +1,8 @@
+node_modules/
+.env
+.env.*
+!.env.example
+
+# Projetos legados (referência local apenas)
+petfind/
+petfinder/

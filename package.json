@@ -1,0 +1,15 @@
+{
+  "name": "petfinder-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=@petfinder/web",
+    "dev:api": "npm run dev --workspace=@petfinder/api",
+    "build": "npm run build --workspaces --if-present",
+    "seed": "npm run seed --workspace=@petfinder/api",
+    "lint": "npm run lint --workspaces --if-present"
+  }
+}
