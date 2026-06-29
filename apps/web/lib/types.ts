@@ -95,3 +95,16 @@ export interface AnnouncementPayload {
   contactPreference?: string;
   sharePhonePublicly?: boolean;
 }
+
+export interface ApiNotification {
+  id: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+  postId: string;
+}
+
+export interface NotificationsResponse {
+  notifications: ApiNotification[];
+  unreadCount: number;
+}

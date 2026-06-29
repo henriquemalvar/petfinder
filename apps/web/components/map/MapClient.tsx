@@ -240,7 +240,7 @@ export default function MapClient({
               key={post.id}
               position={[post.pet.latitude!, post.pet.longitude!]}
               icon={createPinIcon(post.type, isSelected)}
-              ref={(ref) => {
+              ref={(ref: L.Marker | null) => {
                 if (ref) markerRefs.current[post.id] = ref;
               }}
               eventHandlers={{

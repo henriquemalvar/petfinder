@@ -1,12 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { Moon, Sun, Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { clientLogout } from "@/lib/client-api";
+import { NotificationBell } from "./NotificationBell";
+import type { ApiUser } from "@/lib/types";
 
 const links = [
   { href: "/", label: "Início" },
@@ -15,10 +25,30 @@ const links = [
   { href: "/post", label: "Publicar anúncio" },
 ];
 
-export function Navbar() {
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+interface NavbarProps {
+  user?: ApiUser | null;
+}
+
+export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
+
+  async function handleLogout() {
+    await clientLogout();
+    router.push("/");
+    router.refresh();
+  }
 
   return (
     <header className="sticky top-0 z-50 glass-card border-b border-border/50">
@@ -54,9 +84,56 @@ export function Navbar() {
             <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </Button>
-          <Link href="/login" className="hidden md:block">
-            <Button variant="outline" size="sm">Entrar</Button>
-          </Link>
+
+          {user ? (
+            <>
+              <NotificationBell />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="hidden md:flex items-center gap-2 px-2"
+                    aria-label="Menu do usuário"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold overflow-hidden">
+                      {user.avatar ? (
+                        <Image
+                          src={user.avatar}
+                          alt={user.name}
+                          width={32}
+                          height={32}
+                          className="object-cover"
+                        />
+                      ) : (
+                        getInitials(user.name)
+                      )}
+                    </div>
+                    <span className="max-w-[100px] truncate text-sm font-medium">
+                      {user.name}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile">Meu perfil</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    Sair
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <Link href="/login" className="hidden md:block">
+              <Button variant="outline" size="sm">
+                Entrar
+              </Button>
+            </Link>
+          )}
+
           <Button
             variant="ghost"
             size="icon"
@@ -79,15 +156,40 @@ export function Navbar() {
                 onClick={() => setOpen(false)}
                 className={cn(
                   "text-sm font-medium",
-                  pathname === link.href ? "text-primary font-bold" : "text-muted-foreground",
+                  pathname === link.href
+                    ? "text-primary font-bold"
+                    : "text-muted-foreground",
                 )}
               >
                 {link.label}
               </Link>
             ))}
-            <Link href="/login" onClick={() => setOpen(false)}>
-              <Button variant="outline" size="sm" className="w-full">Entrar</Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/profile" onClick={() => setOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full">
+                    Meu perfil
+                  </Button>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full text-destructive"
+                  onClick={() => {
+                    setOpen(false);
+                    handleLogout();
+                  }}
+                >
+                  Sair
+                </Button>
+              </>
+            ) : (
+              <Link href="/login" onClick={() => setOpen(false)}>
+                <Button variant="outline" size="sm" className="w-full">
+                  Entrar
+                </Button>
+              </Link>
+            )}
           </div>
         </nav>
       )}

@@ -4,6 +4,7 @@ import type {
   AnnouncementPayload,
   ApiComment,
   ApiPost,
+  ApiUser,
   AuthResponse,
   PostFilters,
   PostsResponse,
@@ -118,6 +119,23 @@ export async function uploadImage(file: File) {
   }
 
   return res.json() as Promise<{ url: string }>;
+}
+
+export async function getAuthUser(): Promise<ApiUser | null> {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+    if (!token) return null;
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(
+      Buffer.from(parts[1], "base64url").toString("utf-8"),
+    ) as { id?: string };
+    if (!payload.id) return null;
+    return await apiFetch<ApiUser>(`/api/users/${payload.id}`);
+  } catch {
+    return null;
+  }
 }
 
 export { ApiError };
