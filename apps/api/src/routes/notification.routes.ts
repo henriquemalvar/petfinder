@@ -9,5 +9,7 @@ const controller = new NotificationController();
 
 router.post('/register', authMiddleware, validate(registerTokenSchema), controller.register);
 router.post('/nearby', authMiddleware, validate(notifyNearbySchema), controller.notifyNearby);
+router.get('/', authMiddleware, controller.getMyNotifications);
+router.patch('/:id/read', authMiddleware, controller.markAsRead);
 
 export default router;
