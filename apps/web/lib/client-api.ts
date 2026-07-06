@@ -29,6 +29,19 @@ export async function clientRegister(name: string, email: string, password: stri
   return res.json() as Promise<AuthResponse>;
 }
 
+export async function clientGoogleLogin(credential: string) {
+  const res = await fetch("/api/auth/google", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ credential }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || "Erro ao entrar com Google");
+  }
+  return res.json() as Promise<AuthResponse>;
+}
+
 export async function clientLogout() {
   await fetch("/api/auth/logout", { method: "POST" });
 }
