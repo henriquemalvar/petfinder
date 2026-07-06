@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { Separator } from "@/components/ui/separator";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -53,6 +55,14 @@ export default function RegisterPage() {
             {loading ? "Criando..." : "Criar conta"}
           </Button>
         </form>
+        <div className="mt-6 flex items-center gap-3">
+          <Separator className="flex-1" />
+          <span className="text-xs text-muted-foreground">ou</span>
+          <Separator className="flex-1" />
+        </div>
+        <div className="mt-4">
+          <GoogleSignInButton />
+        </div>
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Já tem conta?{" "}
           <Link href="/login" className="font-medium text-primary hover:underline">

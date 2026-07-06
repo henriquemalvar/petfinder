@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import { Separator } from "@/components/ui/separator";
 
 function LoginForm() {
   const router = useRouter();
@@ -50,6 +52,14 @@ function LoginForm() {
             {loading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
+        <div className="mt-6 flex items-center gap-3">
+          <Separator className="flex-1" />
+          <span className="text-xs text-muted-foreground">ou</span>
+          <Separator className="flex-1" />
+        </div>
+        <div className="mt-4">
+          <GoogleSignInButton redirect={searchParams.get("redirect") || undefined} />
+        </div>
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Não tem conta?{" "}
           <Link href="/register" className="font-medium text-primary hover:underline">
