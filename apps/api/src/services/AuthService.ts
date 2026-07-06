@@ -1,6 +1,7 @@
 import * as bcrypt from 'bcryptjs';
 import { StatusCodes } from 'http-status-codes';
 import { generateToken } from '../config/jwt';
+import { GOOGLE_CLIENT_ID, googleClient } from '../config/google';
 import { AppError } from '../errors/AppError';
 import { UserRepository } from '../repositories/UserRepository';
 import { CreateUserDTO } from '../types';
@@ -21,7 +22,7 @@ export class AuthService {
     try {
       const user = await this.repository.findByEmail(email);
 
-      if (!user) {
+      if (!user || !user.password) {
         throw new AppError('Email ou senha inválidos', StatusCodes.UNAUTHORIZED);
       }
 
@@ -54,6 +55,10 @@ export class AuthService {
         throw new AppError('Email já está em uso', StatusCodes.CONFLICT);
       }
 
+      if (!data.password) {
+        throw new AppError('Senha é obrigatória', StatusCodes.BAD_REQUEST);
+      }
+
       const hashedPassword = await bcrypt.hash(data.password, 10);
       const user = await this.repository.create({
         ...data,
@@ -74,4 +79,52 @@ export class AuthService {
       throw new AppError('Erro ao registrar usuário', StatusCodes.INTERNAL_SERVER_ERROR);
     }
   }
-} 
+
+  async authenticateWithGoogle(credential: string) {
+    if (!GOOGLE_CLIENT_ID) {
+      throw new AppError('Login com Google não configurado no servidor', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+
+    let payload;
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: GOOGLE_CLIENT_ID
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new AppError('Token do Google inválido', StatusCodes.UNAUTHORIZED);
+    }
+
+    if (!payload || !payload.email) {
+      throw new AppError('Token do Google inválido', StatusCodes.UNAUTHORIZED);
+    }
+
+    if (!payload.email_verified) {
+      throw new AppError('Email do Google não verificado', StatusCodes.UNAUTHORIZED);
+    }
+
+    const { email, name, picture, sub: googleId } = payload;
+
+    let user = await this.repository.findByEmail(email);
+
+    if (!user) {
+      user = await this.repository.create({
+        name: name || email,
+        email,
+        googleId,
+        avatar: picture
+      });
+    } else if (!user.googleId) {
+      user = await this.repository.update(user.id, { googleId });
+    }
+
+    const { password: _, ...userWithoutPassword } = user;
+    const token = generateToken(userWithoutPassword);
+
+    return {
+      user: userWithoutPassword,
+      token
+    };
+  }
+}
