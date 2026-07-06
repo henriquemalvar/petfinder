@@ -17,4 +17,10 @@ export const registerSchema = z.object({
     contactPreference: z.enum(['WHATSAPP', 'INSTAGRAM']).optional(),
     avatar: z.string().optional()
   })
+});
+
+export const googleLoginSchema = z.object({
+  body: z.object({
+    credential: z.string().min(1, 'Credential do Google é obrigatório')
+  })
 }); 
