@@ -39,4 +39,17 @@ export class AuthController {
       next(error);
     }
   };
+
+  googleLogin = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { credential } = req.body;
+      const result = await this.authService.authenticateWithGoogle(credential);
+      res.status(StatusCodes.OK).json(result);
+    } catch (error) {
+      if (error instanceof AppError) {
+        return res.status(error.statusCode).json({ error: error.message });
+      }
+      next(error);
+    }
+  };
 } 

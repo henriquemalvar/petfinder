@@ -4,7 +4,8 @@ export type User = {
   id: string;
   name: string;
   email: string;
-  password: string;
+  password: string | null;
+  googleId: string | null;
   avatar: string | null;
   whatsapp: string | null;
   instagram: string | null;
@@ -67,7 +68,8 @@ export type Post = {
 export interface CreateUserDTO {
   name: string;
   email: string;
-  password: string;
+  password?: string;
+  googleId?: string;
   avatar?: string;
   whatsapp?: string;
   instagram?: string;
@@ -108,6 +110,7 @@ export interface UpdateUserDTO {
   name?: string;
   email?: string;
   password?: string;
+  googleId?: string;
   avatar?: string;
   whatsapp?: string;
   instagram?: string;

@@ -1,7 +1,7 @@
 import { RequestHandler, Router } from 'express';
 import { AuthController } from '../controllers/AuthController';
 import { validate } from '../middlewares/validate';
-import { loginSchema, registerSchema } from '../schemas/auth.schema';
+import { googleLoginSchema, loginSchema, registerSchema } from '../schemas/auth.schema';
 
 const router = Router();
 const authController = new AuthController();
@@ -126,5 +126,35 @@ router.post('/login', validate(loginSchema), authController.login as RequestHand
  *         description: Email já está em uso
  */
 router.post('/register', validate(registerSchema), authController.register as RequestHandler);
+
+/**
+ * @swagger
+ * /api/auth/google:
+ *   post:
+ *     tags:
+ *       - Autenticação
+ *     summary: Login/registro via Google
+ *     description: Autentica um usuário usando um id_token do Google Identity Services. Cria a conta automaticamente se o email ainda não existir.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - credential
+ *             properties:
+ *               credential:
+ *                 type: string
+ *                 description: id_token retornado pelo Google Identity Services
+ *     responses:
+ *       200:
+ *         description: Login realizado com sucesso
+ *       400:
+ *         description: Dados inválidos
+ *       401:
+ *         description: Token do Google inválido ou email não verificado
+ */
+router.post('/google', validate(googleLoginSchema), authController.googleLogin as RequestHandler);
 
 export default router; 

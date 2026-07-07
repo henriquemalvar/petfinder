@@ -37,6 +37,17 @@ export function timeAgo(date: string) {
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
+/**
+ * Garante que um redirect vindo da URL aponte para uma rota interna,
+ * evitando open-redirect (ex.: ?redirect=https://evil.com ou //evil.com).
+ */
+export function safeRedirect(target: string | null | undefined, fallback = "/") {
+  if (!target) return fallback;
+  if (!target.startsWith("/")) return fallback;
+  if (target.startsWith("//") || target.startsWith("/\\")) return fallback;
+  return target;
+}
+
 export function buildQuery(params: Record<string, string | number | undefined>) {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
