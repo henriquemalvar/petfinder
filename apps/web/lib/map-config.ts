@@ -1,4 +1,5 @@
 import type { PostType } from "./types";
+import { pinIconSvg } from "./map-icons";
 
 export const CITY_COORDS: Record<string, [number, number]> = {
   "São Paulo": [-23.5505, -46.6333],
@@ -23,11 +24,11 @@ export const MAP_TILES = {
 
 export const PIN_CONFIG: Record<
   PostType,
-  { color: string; glow: string; icon: string; label: string }
+  { color: string; glow: string; label: string }
 > = {
-  LOST: { color: "#f59e0b", glow: "rgba(245,158,11,0.35)", icon: "!", label: "Perdido" },
-  FOUND: { color: "#06b6d4", glow: "rgba(6,182,212,0.35)", icon: "✓", label: "Encontrado" },
-  ADOPTION: { color: "#0066ff", glow: "rgba(0,102,255,0.35)", icon: "♥", label: "Adoção" },
+  LOST: { color: "#f59e0b", glow: "rgba(245,158,11,0.35)", label: "Perdido" },
+  FOUND: { color: "#06b6d4", glow: "rgba(6,182,212,0.35)", label: "Encontrado" },
+  ADOPTION: { color: "#0066ff", glow: "rgba(0,102,255,0.35)", label: "Adoção" },
 };
 
 export const DEFAULT_MAP_CENTER: [number, number] = [-23.5505, -46.6333];
@@ -88,7 +89,7 @@ export function createPinHtml(type: PostType, selected = false) {
     <div class="pet-map-marker ${selected ? "pet-map-marker--selected" : ""}" style="${scale}">
       ${pulse}
       <span class="pet-map-marker__dot" style="--pin-color:${config.color};--pin-glow:${config.glow}">
-        ${config.icon}
+        ${pinIconSvg(type)}
       </span>
     </div>
   `;

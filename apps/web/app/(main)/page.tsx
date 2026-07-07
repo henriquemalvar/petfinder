@@ -1,5 +1,14 @@
 import Link from "next/link";
-import { ArrowRight, MapPin, Heart, Search } from "lucide-react";
+import {
+  ArrowRight,
+  Heart,
+  MapPin,
+  PawPrint,
+  Search,
+  Shield,
+  Users,
+  Zap,
+} from "lucide-react";
 import { getPosts } from "@/lib/api-client";
 import { PetCard } from "@/components/pets/PetCard";
 import { MapWrapper } from "@/components/map/MapWrapper";
@@ -7,10 +16,10 @@ import { AdBanner } from "@/components/ads/AdBanner";
 import { Button } from "@/components/ui/button";
 
 const features = [
-  { icon: "🛡️", title: "Privacidade", description: "Seus dados de contato são protegidos e compartilhados apenas quando você autoriza." },
-  { icon: "⚡", title: "Velocidade", description: "Alertas em tempo real para pets perdidos na sua região." },
-  { icon: "🤝", title: "Comunidade", description: "Milhares de voluntários prontos para ajudar a reunir famílias." },
-  { icon: "📍", title: "Mapa inteligente", description: "Visualize todos os alertas próximos em um mapa interativo." },
+  { icon: Shield, title: "Privacidade", description: "Seus dados de contato são protegidos e compartilhados apenas quando você autoriza." },
+  { icon: Zap, title: "Velocidade", description: "Alertas em tempo real para pets perdidos na sua região." },
+  { icon: Users, title: "Comunidade", description: "Milhares de voluntários prontos para ajudar a reunir famílias." },
+  { icon: MapPin, title: "Mapa inteligente", description: "Visualize todos os alertas próximos em um mapa interativo." },
 ];
 
 export default async function HomePage() {
@@ -63,7 +72,9 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-12 md:px-6">
         <div className="grid gap-6 md:grid-cols-3">
           <Link href="/post?type=LOST" className="group rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-warning/20 text-2xl">🔍</div>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-warning/20">
+              <Search className="h-6 w-6 text-warning" />
+            </div>
             <h3 className="text-lg font-semibold">Perdeu um pet?</h3>
             <p className="mt-2 text-sm text-muted-foreground">Publique um alerta e mobilize a comunidade.</p>
             <span className="mt-4 inline-flex items-center text-sm font-medium text-primary">
@@ -71,7 +82,9 @@ export default async function HomePage() {
             </span>
           </Link>
           <Link href="/post?type=FOUND" className="group rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-success/20 text-2xl">🐾</div>
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-success/20">
+              <PawPrint className="h-6 w-6 text-success" />
+            </div>
             <h3 className="text-lg font-semibold">Encontrou um pet?</h3>
             <p className="mt-2 text-sm text-muted-foreground">Ajude a reunir o pet com a família dele.</p>
             <span className="mt-4 inline-flex items-center text-sm font-medium text-primary">
@@ -79,7 +92,7 @@ export default async function HomePage() {
             </span>
           </Link>
           <Link href="/find-pets?type=ADOPTION" className="group rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-tertiary/20 text-2xl">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-tertiary/20">
               <Heart className="h-6 w-6 text-tertiary" />
             </div>
             <h3 className="text-lg font-semibold">Quer adotar?</h3>
@@ -125,17 +138,20 @@ export default async function HomePage() {
         </h2>
         <p className="mb-8 text-muted-foreground">Recursos pensados para quem ama pets.</p>
         <div className="grid gap-4 md:grid-cols-2">
-          {features.map((feature) => (
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
             <article key={feature.title} className="flex gap-4 rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:shadow-md">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-2xl">
-                {feature.icon}
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <Icon className="h-6 w-6 text-primary" />
               </div>
               <div>
                 <h3 className="font-semibold">{feature.title}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{feature.description}</p>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>
