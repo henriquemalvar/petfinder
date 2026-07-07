@@ -5,6 +5,7 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { clientGoogleLogin } from "@/lib/client-api";
+import { safeRedirect } from "@/lib/utils";
 
 interface GoogleCredentialResponse {
   credential: string;
@@ -41,7 +42,7 @@ export function GoogleSignInButton({ redirect }: GoogleSignInButtonProps) {
     try {
       await clientGoogleLogin(response.credential);
       toast.success("Entrada realizada!");
-      router.push(redirect || "/");
+      router.push(safeRedirect(redirect));
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao entrar com Google");
