@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, MapPin, Heart, Search } from "lucide-react";
 import { getPosts } from "@/lib/api-client";
+import { withDemoMapPosts } from "@/lib/mock-posts";
 import { PetCard } from "@/components/pets/PetCard";
 import { MapWrapper } from "@/components/map/MapWrapper";
 import { AdBanner } from "@/components/ads/AdBanner";
@@ -22,15 +23,18 @@ export default async function HomePage() {
     nearbyPosts = [];
   }
 
+  const { posts: mapPosts, isDemo: isMapDemo } = withDemoMapPosts(nearbyPosts);
+
   return (
     <div>
       <section className="relative min-h-[520px] overflow-hidden md:min-h-[600px]">
         <div className="absolute inset-0">
           <MapWrapper
-            posts={nearbyPosts}
+            posts={mapPosts}
             className="h-full w-full rounded-none"
             interactive={false}
             variant="hero"
+            isDemo={isMapDemo}
           />
         </div>
         <div id="hero-tour-overlays" className="pointer-events-none absolute inset-0 z-[5]" />

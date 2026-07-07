@@ -22,6 +22,7 @@ interface MapWrapperProps {
   variant?: "default" | "hero";
   selectedPostId?: string | null;
   onSelectPost?: (post: ApiPost | null) => void;
+  isDemo?: boolean;
 }
 
 export function MapWrapper({
@@ -31,6 +32,7 @@ export function MapWrapper({
   variant,
   selectedPostId,
   onSelectPost,
+  isDemo,
 }: MapWrapperProps) {
   return (
     <MapClient
@@ -40,6 +42,7 @@ export function MapWrapper({
       variant={variant}
       selectedPostId={selectedPostId}
       onSelectPost={onSelectPost}
+      isDemo={isDemo}
     />
   );
 }
