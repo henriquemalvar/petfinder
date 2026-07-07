@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell } from "lucide-react";
+import { Bell, PawPrint } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   Popover,
@@ -89,7 +89,9 @@ export function NotificationBell() {
                   )}
                 >
                   <div className="flex items-start gap-2">
-                    <span className="mt-0.5 text-base">🐾</span>
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                      <PawPrint className="h-3 w-3 text-primary" />
+                    </span>
                     <div className="flex-1 min-w-0">
                       <p className="line-clamp-2">{n.message}</p>
                       <p className="mt-1 text-xs text-muted-foreground">

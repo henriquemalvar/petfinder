@@ -10,6 +10,7 @@ import { MapLegend } from "@/components/map/MapLegend";
 import { StatusChip } from "@/components/pets/StatusChip";
 import { cn, POST_TYPE_LABEL, timeAgo } from "@/lib/utils";
 import { PIN_CONFIG } from "@/lib/map-config";
+import { PIN_ICONS } from "@/lib/map-icons";
 import { Button } from "@/components/ui/button";
 
 interface MapPageClientProps {
@@ -117,6 +118,7 @@ export function MapPageClient({ initialPosts }: MapPageClientProps) {
               "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=120&h=120&fit=crop";
             const isSelected = post.id === selectedPostId;
             const hasCoords = post.pet.latitude != null && post.pet.longitude != null;
+            const PinIcon = PIN_ICONS[post.type];
 
             return (
               <button
@@ -136,10 +138,10 @@ export function MapPageClient({ initialPosts }: MapPageClientProps) {
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg">
                   <Image src={image} alt={post.pet.name} fill className="object-cover" sizes="64px" />
                   <span
-                    className="absolute bottom-1 right-1 flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold text-white"
+                    className="absolute bottom-1 right-1 flex h-4 w-4 items-center justify-center rounded-full text-white"
                     style={{ backgroundColor: PIN_CONFIG[post.type].color }}
                   >
-                    {PIN_CONFIG[post.type].icon}
+                    <PinIcon className="h-2.5 w-2.5" strokeWidth={2.5} />
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">

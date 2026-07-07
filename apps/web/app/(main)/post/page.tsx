@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { CircleCheckBig, Heart, PawPrint, Search, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 
 const STEPS = [
@@ -19,10 +20,10 @@ const STEPS = [
   "Passo 5: Contato e alertas",
 ];
 
-const typeOptions: { value: PostType; label: string; emoji: string }[] = [
-  { value: "LOST", label: "Pet perdido", emoji: "🔍" },
-  { value: "FOUND", label: "Pet encontrado", emoji: "🐾" },
-  { value: "ADOPTION", label: "Pet para adoção", emoji: "❤️" },
+const typeOptions: { value: PostType; label: string; icon: LucideIcon }[] = [
+  { value: "LOST", label: "Pet perdido", icon: Search },
+  { value: "FOUND", label: "Pet encontrado", icon: PawPrint },
+  { value: "ADOPTION", label: "Pet para adoção", icon: Heart },
 ];
 
 function PostWizardContent() {
@@ -98,7 +99,11 @@ function PostWizardContent() {
   if (done) {
     return (
       <div className="mx-auto max-w-lg px-4 py-20 text-center">
-        <div className="text-6xl mb-4">🎉</div>
+        <div className="mb-4 flex justify-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+            <CircleCheckBig className="h-8 w-8 text-primary" />
+          </div>
+        </div>
         <h1 className="text-3xl font-bold text-primary">Anúncio publicado!</h1>
         <p className="mt-4 text-muted-foreground">Seu anúncio já está visível para a comunidade.</p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -119,7 +124,9 @@ function PostWizardContent() {
 
       {step === 0 && (
         <div className="grid gap-4 sm:grid-cols-3">
-          {typeOptions.map((opt) => (
+          {typeOptions.map((opt) => {
+            const Icon = opt.icon;
+            return (
             <button
               key={opt.value}
               type="button"
@@ -130,10 +137,13 @@ function PostWizardContent() {
                   : "border-border hover:border-primary/50"
               }`}
             >
-              <div className="text-4xl">{opt.emoji}</div>
-              <p className="mt-2 font-semibold">{opt.label}</p>
+              <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+                <Icon className="h-6 w-6 text-primary" />
+              </div>
+              <p className="font-semibold">{opt.label}</p>
             </button>
-          ))}
+            );
+          })}
         </div>
       )}
 

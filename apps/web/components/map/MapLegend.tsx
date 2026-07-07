@@ -1,4 +1,5 @@
 import { PIN_CONFIG } from "@/lib/map-config";
+import { PIN_ICONS } from "@/lib/map-icons";
 import type { PostType } from "@/lib/types";
 
 const types: PostType[] = ["LOST", "FOUND", "ADOPTION"];
@@ -10,17 +11,20 @@ export function MapLegend() {
         Legenda
       </p>
       <div className="flex flex-col gap-2">
-        {types.map((type) => (
+        {types.map((type) => {
+          const Icon = PIN_ICONS[type];
+          return (
           <div key={type} className="flex items-center gap-2 text-xs">
             <span
-              className="flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
+              className="flex h-5 w-5 items-center justify-center rounded-full text-white shadow-sm"
               style={{ backgroundColor: PIN_CONFIG[type].color }}
             >
-              {PIN_CONFIG[type].icon}
+              <Icon className="h-3 w-3" strokeWidth={2.5} />
             </span>
             <span>{PIN_CONFIG[type].label}</span>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
