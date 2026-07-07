@@ -15,6 +15,7 @@ import {
   MAP_TILES,
   PIN_CONFIG,
 } from "@/lib/map-config";
+import { isDemoPost } from "@/lib/mock-posts";
 import { HeroMapTour } from "./HeroMapTour";
 import { HeroTourOverlay } from "./HeroTourOverlay";
 import "leaflet/dist/leaflet.css";
@@ -153,6 +154,7 @@ interface MapClientProps {
   selectedPostId?: string | null;
   onSelectPost?: (post: ApiPost | null) => void;
   showLegend?: boolean;
+  isDemo?: boolean;
 }
 
 export default function MapClient({
@@ -162,6 +164,7 @@ export default function MapClient({
   variant = "default",
   selectedPostId = null,
   onSelectPost,
+  isDemo = false,
 }: MapClientProps) {
   const markerRefs = useRef<Record<string, L.Marker>>({});
   const cursorElRef = useRef<HTMLDivElement>(null);
@@ -276,7 +279,7 @@ export default function MapClient({
                         <p className="pet-map-popup__location">{post.pet.location}</p>
                       )}
                       <p className="pet-map-popup__time">{timeAgo(post.createdAt)}</p>
-                      {interactive && (
+                      {interactive && !isDemoPost(post.id) && (
                         <Link href={`/pets/${post.id}`} className="pet-map-popup__link">
                           Ver detalhes →
                         </Link>
@@ -298,7 +301,14 @@ export default function MapClient({
         />
       )}
       {variant === "hero" && <div className="map-hero-vignette pointer-events-none" />}
-      {withCoords.length === 0 && (
+      {isDemo && (
+        <div className="pointer-events-none absolute left-4 top-4 z-[500]">
+          <p className="rounded-full bg-card/90 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
+            Demonstração
+          </p>
+        </div>
+      )}
+      {withCoords.length === 0 && !isDemo && (
         <div className="pointer-events-none absolute inset-0 z-[500] flex items-center justify-center bg-background/40">
           <p className="rounded-xl bg-card/90 px-4 py-2 text-sm text-muted-foreground shadow-sm">
             Nenhum alerta com localização no mapa

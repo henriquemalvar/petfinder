@@ -1,4 +1,5 @@
 import { getPosts } from "@/lib/api-client";
+import { withDemoMapPosts } from "@/lib/mock-posts";
 import { MapPageClient } from "./MapPageClient";
 
 export default async function MapPage() {
@@ -10,5 +11,7 @@ export default async function MapPage() {
     posts = [];
   }
 
-  return <MapPageClient initialPosts={posts} />;
+  const { posts: mapPosts, isDemo } = withDemoMapPosts(posts);
+
+  return <MapPageClient initialPosts={mapPosts} isDemo={isDemo} />;
 }

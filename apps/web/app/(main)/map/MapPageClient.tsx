@@ -8,6 +8,7 @@ import type { ApiPost, PostType } from "@/lib/types";
 import { MapWrapper } from "@/components/map/MapWrapper";
 import { MapLegend } from "@/components/map/MapLegend";
 import { StatusChip } from "@/components/pets/StatusChip";
+import { isDemoPost } from "@/lib/mock-posts";
 import { cn, POST_TYPE_LABEL, timeAgo } from "@/lib/utils";
 import { PIN_CONFIG } from "@/lib/map-config";
 import { PIN_ICONS } from "@/lib/map-icons";
@@ -15,6 +16,7 @@ import { Button } from "@/components/ui/button";
 
 interface MapPageClientProps {
   initialPosts: ApiPost[];
+  isDemo?: boolean;
 }
 
 const filters: { value: PostType | "ALL"; label: string }[] = [
@@ -24,7 +26,7 @@ const filters: { value: PostType | "ALL"; label: string }[] = [
   { value: "ADOPTION", label: "Adoção" },
 ];
 
-export function MapPageClient({ initialPosts }: MapPageClientProps) {
+export function MapPageClient({ initialPosts, isDemo = false }: MapPageClientProps) {
   const [filter, setFilter] = useState<PostType | "ALL">("ALL");
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -69,6 +71,7 @@ export function MapPageClient({ initialPosts }: MapPageClientProps) {
           className="h-full rounded-none"
           selectedPostId={selectedPostId}
           onSelectPost={handleSelectPost}
+          isDemo={isDemo}
         />
         <MapLegend />
         <Button
@@ -87,7 +90,7 @@ export function MapPageClient({ initialPosts }: MapPageClientProps) {
         <div className="border-b border-border p-4">
           <h1 className="text-xl font-bold">Mapa de alertas</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {withCoords.length} de {filtered.length} com localização
+            {isDemo ? "Dados de demonstração" : `${withCoords.length} de ${filtered.length} com localização`}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             {filters.map((f) => (
@@ -158,7 +161,7 @@ export function MapPageClient({ initialPosts }: MapPageClientProps) {
                       {post.pet.location}
                     </p>
                   )}
-                  {isSelected && (
+                  {isSelected && !isDemoPost(post.id) && (
                     <Link
                       href={`/pets/${post.id}`}
                       className="mt-2 inline-block text-xs font-medium text-primary hover:underline"
