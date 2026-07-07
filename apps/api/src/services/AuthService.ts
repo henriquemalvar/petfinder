@@ -116,6 +116,15 @@ export class AuthService {
         avatar: picture
       });
     } else if (!user.googleId) {
+      // Segurança: não vincular automaticamente a uma conta que já tem senha.
+      // O cadastro local não verifica email, então um atacante poderia ter
+      // criado essa conta com o email da vítima; auto-vincular sequestraria a conta.
+      if (user.password) {
+        throw new AppError(
+          'Este email já possui uma conta com senha. Entre com email e senha.',
+          StatusCodes.CONFLICT
+        );
+      }
       user = await this.repository.update(user.id, { googleId });
     }
 
