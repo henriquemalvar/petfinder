@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PetFinderLogo } from "@/components/brand/PetFinderLogo";
 
 export function Footer() {
   return (
@@ -6,7 +7,7 @@ export function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 md:px-6">
         <div className="grid gap-8 md:grid-cols-4">
           <div>
-            <p className="text-lg font-bold text-primary">PetFinder</p>
+            <PetFinderLogo size="sm" />
             <p className="mt-2 text-sm text-muted-foreground">
               Conectando famílias e pets, uma patinha de cada vez.
             </p>

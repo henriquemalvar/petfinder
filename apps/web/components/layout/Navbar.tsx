@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { clientLogout } from "@/lib/client-api";
 import { NotificationBell } from "./NotificationBell";
+import { PetFinderLogo } from "@/components/brand/PetFinderLogo";
 import type { ApiUser } from "@/lib/types";
 
 const links = [
@@ -53,9 +54,7 @@ export function Navbar({ user }: NavbarProps) {
   return (
     <header className="sticky top-0 z-50 glass-card border-b border-border/50">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 md:px-6">
-        <Link href="/" className="text-xl font-bold text-primary md:text-2xl">
-          PetFinder
-        </Link>
+        <PetFinderLogo />
 
         <nav className="hidden items-center gap-8 md:flex">
           {links.map((link) => (
