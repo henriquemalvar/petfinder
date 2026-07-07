@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { Separator } from "@/components/ui/separator";
+import { safeRedirect } from "@/lib/utils";
 
 function LoginForm() {
   const router = useRouter();
@@ -25,7 +26,7 @@ function LoginForm() {
     try {
       await clientLogin(email, password);
       toast.success("Entrada realizada!");
-      router.push(searchParams.get("redirect") || "/");
+      router.push(safeRedirect(searchParams.get("redirect")));
       router.refresh();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao entrar");
@@ -58,7 +59,7 @@ function LoginForm() {
           <Separator className="flex-1" />
         </div>
         <div className="mt-4">
-          <GoogleSignInButton redirect={searchParams.get("redirect") || undefined} />
+          <GoogleSignInButton redirect={safeRedirect(searchParams.get("redirect"))} />
         </div>
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Não tem conta?{" "}
