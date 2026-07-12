@@ -27,47 +27,61 @@ export class NotificationService {
     return R * c;
   }
 
-  async notifyNearbyUsers(postId: string) {
-    const post = await prisma.post.findUnique({
-      where: { id: postId },
-      include: {
-        user: true
-      }
-    });
+  /**
+   * Notifica usuários próximos sobre um novo post.
+   *
+   * É deliberadamente "à prova de falhas": qualquer erro (banco, rede,
+   * Expo fora do ar) é capturado e logado, nunca propagado. Assim a
+   * criação/atualização do post não falha por causa de uma notificação.
+   * Chamadores devem invocar sem `await` (fire-and-forget).
+   */
+  async notifyNearbyUsers(postId: string): Promise<void> {
+    try {
+      const post = await prisma.post.findUnique({
+        where: { id: postId },
+        include: {
+          user: true
+        }
+      });
 
-    if (!post || post.user.latitude == null || post.user.longitude == null) {
-      return;
+      if (!post || post.user.latitude == null || post.user.longitude == null) {
+        return;
+      }
+
+      const users = await prisma.user.findMany({
+        where: {
+          id: { not: post.userId },
+          latitude: { not: null },
+          longitude: { not: null }
+        }
+      });
+
+      const nearbyUserIds = users
+        .filter(u =>
+          this.getDistanceKm(
+            post.user.latitude!,
+            post.user.longitude!,
+            u.latitude!,
+            u.longitude!
+          ) <= 10
+        )
+        .map(u => u.id);
+
+      if (!nearbyUserIds.length) return;
+
+      const tokens = await this.tokenRepo.findByUserIds(nearbyUserIds);
+
+      if (!tokens.length) return;
+
+      const messages = tokens.map(t => ({ to: t.token, sound: 'default', body: 'Há um novo post perto de você!' }));
+
+      await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(messages)
+      });
+    } catch (error) {
+      console.error(`[NotificationService] Falha ao notificar sobre o post ${postId}:`, error);
     }
-
-    const users = await prisma.user.findMany({
-      where: {
-        id: { not: post.userId },
-        latitude: { not: null },
-        longitude: { not: null }
-      }
-    });
-
-    const nearbyUserIds = users
-      .filter(u =>
-        this.getDistanceKm(
-          post.user.latitude!,
-          post.user.longitude!,
-          u.latitude!,
-          u.longitude!
-        ) <= 10
-      )
-      .map(u => u.id);
-
-    if (!nearbyUserIds.length) return;
-
-    const tokens = await this.tokenRepo.findByUserIds(nearbyUserIds);
-
-    const messages = tokens.map(t => ({ to: t.token, sound: 'default', body: 'Há um novo post perto de você!' }));
-
-    await fetch('https://exp.host/--/api/v2/push/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(messages)
-    });
   }
 }

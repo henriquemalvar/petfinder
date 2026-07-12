@@ -35,7 +35,8 @@ export class PostService {
 
   async create(data: CreatePostDTO): Promise<Post> {
     const post = await this.repository.create(data);
-    await this.notificationService.notifyNearbyUsers(post.id);
+    // Fire-and-forget: notificar não pode falhar a criação do post.
+    void this.notificationService.notifyNearbyUsers(post.id);
     return post;
   }
 
@@ -47,7 +48,7 @@ export class PostService {
     }
 
     const updated = await this.repository.update(id, data);
-    await this.notificationService.notifyNearbyUsers(updated.id);
+    void this.notificationService.notifyNearbyUsers(updated.id);
     return updated;
   }
 
