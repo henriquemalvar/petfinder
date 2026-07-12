@@ -10,9 +10,12 @@ export class PostService {
   private repository: PostRepository;
   private notificationService: NotificationService;
 
-  constructor() {
-    this.repository = new PostRepository();
-    this.notificationService = new NotificationService();
+  constructor(
+    repository: PostRepository = new PostRepository(),
+    notificationService: NotificationService = new NotificationService()
+  ) {
+    this.repository = repository;
+    this.notificationService = notificationService;
   }
 
   async findAll(): Promise<Post[]> {
@@ -39,11 +42,15 @@ export class PostService {
     return post;
   }
 
-  async update(id: string, data: UpdatePostDTO): Promise<Post> {
+  async update(id: string, data: UpdatePostDTO, requesterId: string): Promise<Post> {
     const post = await this.repository.findById(id);
 
     if (!post) {
       throw new AppError('Post não encontrado', StatusCodes.NOT_FOUND);
+    }
+
+    if (post.userId !== requesterId) {
+      throw new AppError('Você não tem permissão para alterar este post', StatusCodes.FORBIDDEN);
     }
 
     const updated = await this.repository.update(id, data);
@@ -51,11 +58,15 @@ export class PostService {
     return updated;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, requesterId: string): Promise<void> {
     const post = await this.repository.findById(id);
 
     if (!post) {
       throw new AppError('Post não encontrado', StatusCodes.NOT_FOUND);
+    }
+
+    if (post.userId !== requesterId) {
+      throw new AppError('Você não tem permissão para remover este post', StatusCodes.FORBIDDEN);
     }
 
     await this.repository.delete(id);
