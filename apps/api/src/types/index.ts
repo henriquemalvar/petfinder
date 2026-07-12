@@ -1,4 +1,4 @@
-import { PetGender, PetSize, PostStatus, PostType } from '@prisma/client';
+import { ContactPreference, PetGender, PetSize, PostStatus, PostType } from '@prisma/client';
 
 export type User = {
   id: string;
@@ -9,7 +9,7 @@ export type User = {
   avatar: string | null;
   whatsapp: string | null;
   instagram: string | null;
-  contactPreference: string | null;
+  contactPreference: ContactPreference | null;
   address: string | null;
   latitude: number | null;
   longitude: number | null;
@@ -73,7 +73,7 @@ export interface CreateUserDTO {
   avatar?: string;
   whatsapp?: string;
   instagram?: string;
-  contactPreference?: string;
+  contactPreference?: ContactPreference;
   address?: string;
   latitude?: number;
   longitude?: number;
@@ -114,7 +114,7 @@ export interface UpdateUserDTO {
   avatar?: string;
   whatsapp?: string;
   instagram?: string;
-  contactPreference?: string;
+  contactPreference?: ContactPreference;
   address?: string;
   latitude?: number;
   longitude?: number;
