@@ -1,5 +1,5 @@
 import swaggerUi from 'swagger-ui-express';
-const swaggerJsdoc = require('swagger-jsdoc');
+import swaggerJsdoc from 'swagger-jsdoc';
 
 const options = {
   definition: {
