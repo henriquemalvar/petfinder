@@ -86,7 +86,8 @@ export class AnnouncementService {
       return createdPost;
     });
 
-    await this.notificationService.notifyNearbyUsers(result.id);
+    // Fire-and-forget: notificar não pode falhar a criação do anúncio.
+    void this.notificationService.notifyNearbyUsers(result.id);
     return result;
   }
 }
