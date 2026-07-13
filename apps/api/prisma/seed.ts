@@ -1,5 +1,5 @@
 import { PetGender, PetSize, PostStatus, PostType } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { prisma } from '../src/config/prisma';
 
 const CITY_COORDS: Record<string, [number, number]> = {
