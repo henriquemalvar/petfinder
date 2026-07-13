@@ -15,7 +15,9 @@ export const createUserSchema = z.object({
   })
 });
 
-export const updateUserSchema = createUserSchema.partial();
+export const updateUserSchema = z.object({
+  body: createUserSchema.shape.body.partial()
+});
 
 export const userIdParamSchema = z.object({
   params: z.object({
