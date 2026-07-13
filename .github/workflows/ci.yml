@@ -21,8 +21,8 @@ jobs:
         run: npm run --workspace=@petfinder/api postinstall
       - name: Lint
         run: npm run lint --workspace=@petfinder/api
-      - name: Typecheck
-        run: npx tsc --noEmit -p apps/api/tsconfig.json
+      - name: Typecheck (src + prisma/seed)
+        run: npm run typecheck --workspace=@petfinder/api
       - name: Testes
         working-directory: apps/api
         run: |
