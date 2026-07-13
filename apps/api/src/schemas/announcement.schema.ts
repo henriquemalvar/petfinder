@@ -24,7 +24,7 @@ export const createAnnouncementSchema = z.object({
     }),
     whatsapp: z.string().optional(),
     instagram: z.string().optional(),
-    contactPreference: z.string().optional(),
+    contactPreference: z.enum(['WHATSAPP', 'INSTAGRAM']).optional(),
     sharePhonePublicly: z.boolean().optional(),
   }),
 });

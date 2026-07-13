@@ -31,6 +31,11 @@ enum PostStatus {
   CANCELED
 }
 
+enum ContactPreference {
+  WHATSAPP
+  INSTAGRAM
+}
+
 model User {
   id                String              @id @default(uuid())
   name              String
@@ -40,7 +45,7 @@ model User {
   avatar            String?
   whatsapp          String?
   instagram         String?
-  contactPreference String?
+  contactPreference ContactPreference?
   address           String?
   latitude          Float?
   longitude         Float?

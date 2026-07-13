@@ -26,7 +26,12 @@ export const authMiddleware = (
     return;
   }
 
-  const token = authorization.replace('Bearer', '').trim();
+  const [scheme, token] = authorization.split(' ');
+
+  if (scheme !== 'Bearer' || !token) {
+    res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Token mal formatado' });
+    return;
+  }
 
   try {
     const data = jwt.verify(token, getJwtSecret()) as TokenPayload;
