@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  api:
+    name: API (typecheck + testes)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Prisma generate
+        run: npm run --workspace=@petfinder/api postinstall
+      - name: Typecheck
+        run: npx tsc --noEmit -p apps/api/tsconfig.json
+      - name: Testes
+        working-directory: apps/api
+        run: |
+          if grep -q '"test": "vitest' package.json; then
+            npm test
+          else
+            echo "Sem runner de testes nesta ref; pulando."
+          fi
+
+  web:
+    name: Web (typecheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Prisma generate (dep do build)
+        run: npm run --workspace=@petfinder/api postinstall
+      - name: Typecheck
+        run: npx tsc --noEmit -p apps/web/tsconfig.json
