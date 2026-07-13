@@ -1,6 +1,7 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
+import helmet from 'helmet';
 import morgan from 'morgan';
 import { swaggerDocs, swaggerSetup } from './config/swagger';
 import routes from './routes';
@@ -12,11 +13,12 @@ dotenv.config();
 const app = express();
 
 // Middlewares
+app.use(helmet());
 app.use(cors({
   origin: process.env.WEB_URL || 'http://localhost:3000',
   credentials: true,
 }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use(morgan('dev'));
 
 // Documentação Swagger

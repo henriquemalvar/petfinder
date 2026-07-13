@@ -1,10 +1,13 @@
 import { RequestHandler, Router } from 'express';
 import { AuthController } from '../controllers/AuthController';
 import { validate } from '../middlewares/validate';
+import { authLimiter } from '../middlewares/rateLimit';
 import { googleLoginSchema, loginSchema, registerSchema } from '../schemas/auth.schema';
 
 const router = Router();
 const authController = new AuthController();
+
+router.use(authLimiter);
 
 /**
  * @swagger
