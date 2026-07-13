@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "cy:open": "cypress open",
     "cy:run": "cypress run"
   },
@@ -62,12 +62,15 @@
     "zod": "^3.25.62"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.6",
     "@tailwindcss/postcss": "^4.3.2",
     "@types/leaflet": "^1.9.17",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "cypress": "^14.4.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.20",
     "tailwindcss": "^4.3.2",
     "tw-animate-css": "^1.3.4",
     "typescript": "^5"

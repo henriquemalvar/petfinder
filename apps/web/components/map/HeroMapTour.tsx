@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
 import type { ApiPost } from "@/lib/types";
 import { getHeroCardOcclusionWidth, isPostVisibleOnHeroMap } from "@/lib/map-config";
@@ -82,13 +82,13 @@ export function HeroMapTour({
   postsRef.current = posts;
   const postIds = posts.map((p) => p.id).join(",");
 
-  const syncMapSize = () => {
+  const syncMapSize = useCallback(() => {
     const size = map.getSize();
     mapSizeRef.current = { width: size.x, height: size.y };
-  };
+  }, [map, mapSizeRef]);
 
   useEffect(() => {
-    if (posts.length === 0) return;
+    if (postIds.length === 0) return;
 
     runningRef.current = true;
     let holdTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -256,7 +256,7 @@ export function HeroMapTour({
       onCursorVisible(false);
       onActivePost(null, null);
     };
-  }, [map, postIds, cursorElRef, mapSizeRef, onCursorVisible, onActivePost]);
+  }, [map, postIds, cursorElRef, mapSizeRef, onCursorVisible, onActivePost, syncMapSize]);
 
   return null;
 }
