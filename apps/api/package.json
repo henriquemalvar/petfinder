@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "seed": "ts-node prisma/seed.ts",
     "postinstall": "prisma generate"
   },

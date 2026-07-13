@@ -9,7 +9,7 @@ export class UploadController {
     this.uploadService = new UploadService();
   }
 
-  upload = async (req: Request & { file?: Express.Multer.File }, res: Response, next: NextFunction) => {
+  upload = async (req: Request & { file?: Express.Multer.File }, res: Response, _next: NextFunction) => {
     try {
       if (!req.file) {
         res.status(StatusCodes.BAD_REQUEST).json({ error: 'Arquivo não enviado' });
@@ -24,7 +24,7 @@ export class UploadController {
       }
 
       res.status(StatusCodes.CREATED).json({ url });
-    } catch (error) {
+    } catch (_error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Erro interno do servidor' });
     }
   };

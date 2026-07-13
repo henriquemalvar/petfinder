@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { USER_SELECT } from '../constants/prismaSelect';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
@@ -50,7 +49,7 @@ export const authMiddleware = (
     }).catch(() => {
       res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Token inválido' });
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Token inválido' });
   }
 }; 

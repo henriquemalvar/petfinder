@@ -1,7 +1,5 @@
 import { PetGender, PetSize, PostStatus, PostType } from '@prisma/client';
 import { prisma } from '../config/prisma';
-import { StatusCodes } from 'http-status-codes';
-import { AppError } from '../errors/AppError';
 import { CreateAnnouncementInput } from '../schemas/announcement.schema';
 import { NotificationService } from './NotificationService';
 
