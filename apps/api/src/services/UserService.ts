@@ -7,8 +7,8 @@ import { CreateUserDTO, UpdateUserDTO, UserResponse } from '../types';
 export class UserService {
   private repository: UserRepository;
 
-  constructor() {
-    this.repository = new UserRepository();
+  constructor(repository: UserRepository = new UserRepository()) {
+    this.repository = repository;
   }
 
   async findAll(): Promise<UserResponse[]> {
@@ -47,7 +47,11 @@ export class UserService {
     return userWithoutPassword;
   }
 
-  async update(id: string, data: UpdateUserDTO): Promise<UserResponse> {
+  async update(id: string, data: UpdateUserDTO, requesterId: string): Promise<UserResponse> {
+    if (id !== requesterId) {
+      throw new AppError('Você não tem permissão para alterar esta conta', StatusCodes.FORBIDDEN);
+    }
+
     const user = await this.repository.findById(id);
 
     if (!user) {
@@ -70,7 +74,11 @@ export class UserService {
     return userWithoutPassword;
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, requesterId: string): Promise<void> {
+    if (id !== requesterId) {
+      throw new AppError('Você não tem permissão para remover esta conta', StatusCodes.FORBIDDEN);
+    }
+
     const user = await this.repository.findById(id);
 
     if (!user) {

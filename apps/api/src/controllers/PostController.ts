@@ -68,7 +68,7 @@ export class PostController {
     try {
       const id = String(req.params.id);
       const postData: UpdatePostDTO = req.body;
-      const post = await this.postService.update(id, postData);
+      const post = await this.postService.update(id, postData, req.user.id);
       res.status(StatusCodes.OK).json(post);
     } catch (error) {
       next(error);
@@ -79,7 +79,7 @@ export class PostController {
     try {
       const id = String(req.params.id);
       const postData: Partial<UpdatePostDTO> = req.body;
-      const post = await this.postService.update(id, postData);
+      const post = await this.postService.update(id, postData, req.user.id);
       res.status(StatusCodes.OK).json(post);
     } catch (error) {
       next(error);
@@ -89,7 +89,7 @@ export class PostController {
   delete = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = String(req.params.id);
-      await this.postService.delete(id);
+      await this.postService.delete(id, req.user.id);
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);

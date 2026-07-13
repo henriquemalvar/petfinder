@@ -43,7 +43,7 @@ export class UserController {
     try {
       const id = String(req.params.id);
       const userData: UpdateUserDTO = req.body;
-      const user = await this.userService.update(id, userData);
+      const user = await this.userService.update(id, userData, req.user.id);
       res.status(StatusCodes.OK).json(user);
     } catch (error) {
       next(error);
@@ -54,7 +54,7 @@ export class UserController {
     try {
       const id = String(req.params.id);
       const userData: Partial<UpdateUserDTO> = req.body;
-      const user = await this.userService.update(id, userData);
+      const user = await this.userService.update(id, userData, req.user.id);
       res.status(StatusCodes.OK).json(user);
     } catch (error) {
       next(error);
@@ -64,7 +64,7 @@ export class UserController {
   delete = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = String(req.params.id);
-      await this.userService.delete(id);
+      await this.userService.delete(id, req.user.id);
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);
