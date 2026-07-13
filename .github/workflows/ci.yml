@@ -8,7 +8,7 @@ on:
 
 jobs:
   api:
-    name: API (typecheck + testes)
+    name: API (lint + typecheck + testes)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +19,8 @@ jobs:
       - run: npm ci
       - name: Prisma generate
         run: npm run --workspace=@petfinder/api postinstall
+      - name: Lint
+        run: npm run lint --workspace=@petfinder/api
       - name: Typecheck
         run: npx tsc --noEmit -p apps/api/tsconfig.json
       - name: Testes
@@ -31,7 +33,7 @@ jobs:
           fi
 
   web:
-    name: Web (typecheck)
+    name: Web (lint + typecheck)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -42,5 +44,7 @@ jobs:
       - run: npm ci
       - name: Prisma generate (dep do build)
         run: npm run --workspace=@petfinder/api postinstall
+      - name: Lint
+        run: npm run lint --workspace=@petfinder/web
       - name: Typecheck
         run: npx tsc --noEmit -p apps/web/tsconfig.json

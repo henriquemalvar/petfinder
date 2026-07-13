@@ -221,6 +221,7 @@ function PostWizardContent() {
         <div className="text-center">
           <div className="mx-auto flex h-48 w-full max-w-sm items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-muted">
             {imagePreview ? (
+              // eslint-disable-next-line @next/next/no-img-element -- preview local (blob/data URL), next/image não otimiza
               <img src={imagePreview} alt="Prévia" className="h-full w-full object-cover" />
             ) : (
               <p className="text-sm text-muted-foreground">Arraste ou selecione uma foto</p>
