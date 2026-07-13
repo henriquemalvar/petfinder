@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import * as jwt from 'jsonwebtoken';
 import { UserResponse } from '../types';
 import { prisma } from '../config/prisma';
+import { getJwtSecret } from '../config/env';
 
 
 interface TokenPayload {
@@ -28,7 +29,7 @@ export const authMiddleware = (
   const token = authorization.replace('Bearer', '').trim();
 
   try {
-    const data = jwt.verify(token, process.env.JWT_SECRET || 'default_secret') as TokenPayload;
+    const data = jwt.verify(token, getJwtSecret()) as TokenPayload;
     
     prisma.user.findUnique({
       where: { id: data.id },
