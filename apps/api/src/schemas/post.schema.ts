@@ -13,7 +13,9 @@ export const createPostSchema = z.object({
   })
 });
 
-export const updatePostSchema = createPostSchema.partial();
+export const updatePostSchema = z.object({
+  body: createPostSchema.shape.body.partial()
+});
 
 export const postIdParamSchema = z.object({
   params: z.object({
