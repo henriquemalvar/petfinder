@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PetCard } from "@/components/pets/PetCard";
+import { MyAnnouncementCard } from "@/components/pets/MyAnnouncementCard";
 import { clientUpload } from "@/lib/client-api";
 import type { ApiPost, ApiUser } from "@/lib/types";
 
@@ -172,7 +172,7 @@ export function ProfileClient({ user, posts }: ProfileClientProps) {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
               {posts.map((post) => (
-                <PetCard key={post.id} post={post} />
+                <MyAnnouncementCard key={post.id} post={post} />
               ))}
             </div>
           )}
