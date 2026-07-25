@@ -9,8 +9,8 @@ export class PetService {
   private repository: PetRepository;
   private prisma: PrismaClient;
 
-  constructor() {
-    this.repository = new PetRepository();
+  constructor(repository: PetRepository = new PetRepository()) {
+    this.repository = repository;
     this.prisma = prisma;
   }
 
@@ -32,21 +32,29 @@ export class PetService {
     return this.repository.create(data as PetCreate);
   }
 
-  async update(id: string, data: UpdatePetDTO): Promise<PetResponse> {
+  async update(id: string, data: UpdatePetDTO, requesterId: string): Promise<PetResponse> {
     const pet = await this.repository.findById(id);
 
     if (!pet) {
       throw new AppError('Pet não encontrado', StatusCodes.NOT_FOUND);
     }
 
+    if (pet.userId !== requesterId) {
+      throw new AppError('Você não tem permissão para alterar este pet', StatusCodes.FORBIDDEN);
+    }
+
     return this.repository.update(id, data);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, requesterId: string): Promise<void> {
     const pet = await this.repository.findById(id);
 
     if (!pet) {
       throw new AppError('Pet não encontrado', StatusCodes.NOT_FOUND);
+    }
+
+    if (pet.userId !== requesterId) {
+      throw new AppError('Você não tem permissão para remover este pet', StatusCodes.FORBIDDEN);
     }
 
     await this.repository.delete(id);
