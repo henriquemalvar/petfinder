@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MyAnnouncementCard } from "@/components/pets/MyAnnouncementCard";
+import { AccountSecurity } from "@/components/profile/AccountSecurity";
 import { clientUpload } from "@/lib/client-api";
 import type { ApiPost, ApiUser } from "@/lib/types";
 
@@ -202,6 +203,8 @@ export function ProfileClient({ user, posts }: ProfileClientProps) {
           )}
         </div>
       </div>
+
+      <AccountSecurity userId={user.id} />
     </div>
   );
 }
