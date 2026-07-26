@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
+import * as bcrypt from 'bcryptjs';
 import { UserService } from '../UserService';
+
+const HASH = bcrypt.hashSync('senha-atual', 10);
 
 function buildService() {
   const repository = {
@@ -39,5 +42,74 @@ describe('UserService ownership', () => {
 
     await expect(service.delete('victim', 'attacker')).rejects.toMatchObject({ statusCode: 403 });
     expect(repository.delete).not.toHaveBeenCalled();
+  });
+});
+
+describe('UserService.changePassword', () => {
+  it('recusa conta sem senha (login Google)', async () => {
+    const { service, repository } = buildService();
+    repository.findById.mockResolvedValue({ id: 'me', password: null });
+
+    await expect(service.changePassword('me', 'x', 'nova-senha')).rejects.toMatchObject({
+      statusCode: 400,
+    });
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('recusa quando a senha atual está incorreta', async () => {
+    const { service, repository } = buildService();
+    repository.findById.mockResolvedValue({ id: 'me', password: HASH });
+
+    await expect(service.changePassword('me', 'errada', 'nova-senha')).rejects.toMatchObject({
+      statusCode: 401,
+    });
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('troca a senha quando a atual confere', async () => {
+    const { service, repository } = buildService();
+    repository.findById.mockResolvedValue({ id: 'me', password: HASH });
+
+    await service.changePassword('me', 'senha-atual', 'nova-senha');
+
+    const [, data] = repository.update.mock.calls[0];
+    expect(data.password).toBeDefined();
+    expect(data.password).not.toBe('nova-senha'); // guardada com hash
+  });
+});
+
+describe('UserService.delete confirmação', () => {
+  it('exige senha para conta que tem senha', async () => {
+    const { service, repository } = buildService();
+    repository.findById.mockResolvedValue({ id: 'me', password: HASH });
+
+    await expect(service.delete('me', 'me')).rejects.toMatchObject({ statusCode: 400 });
+    expect(repository.delete).not.toHaveBeenCalled();
+  });
+
+  it('recusa senha incorreta na exclusão', async () => {
+    const { service, repository } = buildService();
+    repository.findById.mockResolvedValue({ id: 'me', password: HASH });
+
+    await expect(service.delete('me', 'me', 'errada')).rejects.toMatchObject({ statusCode: 401 });
+    expect(repository.delete).not.toHaveBeenCalled();
+  });
+
+  it('exclui quando a senha confere', async () => {
+    const { service, repository } = buildService();
+    repository.findById.mockResolvedValue({ id: 'me', password: HASH });
+
+    await service.delete('me', 'me', 'senha-atual');
+
+    expect(repository.delete).toHaveBeenCalledWith('me');
+  });
+
+  it('exclui conta só-Google sem exigir senha', async () => {
+    const { service, repository } = buildService();
+    repository.findById.mockResolvedValue({ id: 'me', password: null });
+
+    await service.delete('me', 'me');
+
+    expect(repository.delete).toHaveBeenCalledWith('me');
   });
 });
