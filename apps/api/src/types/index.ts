@@ -149,6 +149,19 @@ export type PetResponse = Omit<Pet, 'user' | 'posts'> & {
   posts: Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'type' | 'status' | 'title' | 'content' | 'petId' | 'userId'>[];
 };
 
+export interface Pagination {
+  page?: number;
+  limit?: number;
+}
+
+export interface Paginated<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 // Tipos para filtros
 export interface PostFilters {
   type?: PostType;

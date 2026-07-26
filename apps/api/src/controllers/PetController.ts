@@ -27,7 +27,10 @@ export class PetController {
 
   findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const pets = await this.petService.findAll();
+      const pets = await this.petService.findAll({
+        page: req.query.page ? Number(req.query.page) : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+      });
       res.status(StatusCodes.OK).json(pets);
     } catch (error) {
       next(error);
@@ -90,7 +93,10 @@ export class PetController {
         throw new AppError('Não autorizado a acessar pets de outro usuário', StatusCodes.FORBIDDEN);
       }
 
-      const pets = await this.petService.findByUserId(userId);
+      const pets = await this.petService.findByUserId(userId, {
+        page: req.query.page ? Number(req.query.page) : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+      });
       res.status(StatusCodes.OK).json(pets);
     } catch (error) {
       next(error);

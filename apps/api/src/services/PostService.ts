@@ -3,7 +3,7 @@ import { prisma } from '../config/prisma';
 import { StatusCodes } from 'http-status-codes';
 import { AppError } from '../errors/AppError';
 import { PostRepository } from '../repositories/PostRepository';
-import { CreatePostDTO, PostFilters, UpdatePostDTO } from '../types';
+import { CreatePostDTO, Paginated, Pagination, PostFilters, UpdatePostDTO } from '../types';
 import { NotificationService } from './NotificationService';
 
 export class PostService {
@@ -18,8 +18,8 @@ export class PostService {
     this.notificationService = notificationService;
   }
 
-  async findAll(): Promise<Post[]> {
-    return this.repository.findAll();
+  async findAll(pagination?: Pagination): Promise<Paginated<Post>> {
+    return this.repository.findAll(pagination);
   }
 
   async findAllWithFilters(filters: PostFilters) {
@@ -77,7 +77,7 @@ export class PostService {
     await this.repository.delete(id);
   }
 
-  async findByUserId(userId: string): Promise<Post[]> {
+  async findByUserId(userId: string, pagination?: Pagination): Promise<Paginated<Post>> {
     // Verifica se o usuário existe
     const user = await prisma.user.findUnique({
       where: { id: userId }
@@ -88,10 +88,10 @@ export class PostService {
     }
 
     // Busca os posts ordenados por data de criação (mais recentes primeiro)
-    return this.repository.findByUserId(userId);
+    return this.repository.findByUserId(userId, pagination);
   }
 
-  async findByPetId(petId: string): Promise<Post[]> {
-    return this.repository.findByPetId(petId);
+  async findByPetId(petId: string, pagination?: Pagination): Promise<Paginated<Post>> {
+    return this.repository.findByPetId(petId, pagination);
   }
 } 

@@ -25,7 +25,10 @@ export class PostController {
 
   findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const posts = await this.postService.findAll();
+      const posts = await this.postService.findAll({
+        page: req.query.page ? Number(req.query.page) : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+      });
       res.status(StatusCodes.OK).json(posts);
     } catch (error) {
       next(error);
@@ -99,7 +102,10 @@ export class PostController {
   findByUserId = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = String(req.params.userId);
-      const posts = await this.postService.findByUserId(userId);
+      const posts = await this.postService.findByUserId(userId, {
+        page: req.query.page ? Number(req.query.page) : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+      });
       res.status(StatusCodes.OK).json(posts);
     } catch (error) {
       next(error);
@@ -109,7 +115,10 @@ export class PostController {
   findByPetId = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const petId = String(req.params.petId);
-      const posts = await this.postService.findByPetId(petId);
+      const posts = await this.postService.findByPetId(petId, {
+        page: req.query.page ? Number(req.query.page) : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+      });
       res.status(StatusCodes.OK).json(posts);
     } catch (error) {
       next(error);

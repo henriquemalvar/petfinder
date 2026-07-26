@@ -3,7 +3,7 @@ import { prisma } from '../config/prisma';
 import { StatusCodes } from 'http-status-codes';
 import { AppError } from '../errors/AppError';
 import { PetRepository } from '../repositories/PetRepository';
-import { CreatePetDTO, PetCreate, PetResponse, UpdatePetDTO } from '../types';
+import { CreatePetDTO, Paginated, Pagination, PetCreate, PetResponse, UpdatePetDTO } from '../types';
 
 export class PetService {
   private repository: PetRepository;
@@ -14,8 +14,8 @@ export class PetService {
     this.prisma = prisma;
   }
 
-  async findAll(): Promise<PetResponse[]> {
-    return this.repository.findAll();
+  async findAll(pagination?: Pagination): Promise<Paginated<PetResponse>> {
+    return this.repository.findAll(pagination);
   }
 
   async findById(id: string): Promise<PetResponse> {
@@ -60,7 +60,7 @@ export class PetService {
     await this.repository.delete(id);
   }
 
-  async findByUserId(userId: string): Promise<PetResponse[]> {
+  async findByUserId(userId: string, pagination?: Pagination): Promise<Paginated<PetResponse>> {
     // Verifica se o usuário existe
     const user = await this.prisma.user.findUnique({
       where: { id: userId }
@@ -70,6 +70,6 @@ export class PetService {
       throw new AppError('Usuário não encontrado', StatusCodes.NOT_FOUND);
     }
 
-    return this.repository.findByUserId(userId);
+    return this.repository.findByUserId(userId, pagination);
   }
 } 
