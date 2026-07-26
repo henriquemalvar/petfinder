@@ -54,13 +54,10 @@ export class PostService {
       throw new AppError('Você não tem permissão para alterar este post', StatusCodes.FORBIDDEN);
     }
 
-    const updated = await this.repository.update(id, data);
-    // Só notifica a vizinhança enquanto o anúncio segue ativo. Marcar como
-    // resolvido/cancelado não deve disparar alerta de "pet perdido na região".
-    if (updated.status === 'ACTIVE') {
-      void this.notificationService.notifyNearbyUsers(updated.id);
-    }
-    return updated;
+    // Só a criação notifica a vizinhança. Editar um anúncio (corrigir texto,
+    // trocar foto) não pode re-notificar todo mundo do raio a cada save,
+    // senão vira spam no sino de quem está por perto.
+    return this.repository.update(id, data);
   }
 
   async delete(id: string, requesterId: string): Promise<void> {
