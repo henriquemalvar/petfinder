@@ -17,7 +17,6 @@ export type User = {
   updatedAt: Date;
   pets?: Pet[];
   posts?: Post[];
-  tokens?: NotificationToken[];
   notifications?: Notification[];
 };
 
@@ -173,13 +172,4 @@ export type Notification = {
   createdAt: Date;
   user?: User;
   post?: Post;
-};
-
-export type NotificationToken = {
-  id: string;
-  token: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  user?: User;
 };
