@@ -68,6 +68,7 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql://petfinder:petfinder@localhost:5432/petfinder
+      DIRECT_URL: postgresql://petfinder:petfinder@localhost:5432/petfinder
       JWT_SECRET: e2e-secret
       NEXT_PUBLIC_API_URL: http://localhost:3333
       # A suíte roda tudo de um mesmo IP; o limite de 20/15min do /auth
