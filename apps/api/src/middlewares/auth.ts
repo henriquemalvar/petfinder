@@ -13,11 +13,11 @@ interface TokenPayload {
   exp: number;
 }
 
-export const authMiddleware = (
+export const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
-): Promise<void> | void => {
+): Promise<void> => {
   const { authorization } = req.headers;
 
   if (!authorization) {
@@ -32,24 +32,29 @@ export const authMiddleware = (
     return;
   }
 
-  try {
-    const data = jwt.verify(token, getJwtSecret()) as TokenPayload;
-    
-    prisma.user.findUnique({
-      where: { id: data.id },
-      select: USER_SELECT
-    }).then(user => {
-      if (!user) {
-        res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Usuário não encontrado' });
-        return;
-      }
+  let payload: TokenPayload;
 
-      req.user = user as UserResponse;
-      next();
-    }).catch(() => {
-      res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Token inválido' });
-    });
+  try {
+    payload = jwt.verify(token, getJwtSecret()) as TokenPayload;
   } catch (_error) {
     res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Token inválido' });
+    return;
   }
-}; 
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      select: USER_SELECT
+    });
+
+    if (!user) {
+      res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Usuário não encontrado' });
+      return;
+    }
+
+    req.user = user as UserResponse;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
