@@ -10,6 +10,20 @@ jobs:
   api:
     name: API (lint + typecheck + testes)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: petfinder
+          POSTGRES_PASSWORD: petfinder
+          POSTGRES_DB: petfinder_test
+        ports:
+          - 5436:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,14 +37,12 @@ jobs:
         run: npm run lint --workspace=@petfinder/api
       - name: Typecheck (src + prisma/seed)
         run: npm run typecheck --workspace=@petfinder/api
-      - name: Testes
+      - name: Testes unitários
         working-directory: apps/api
-        run: |
-          if grep -q '"test": "vitest' package.json; then
-            npm test
-          else
-            echo "Sem runner de testes nesta ref; pulando."
-          fi
+        run: npm test
+      - name: Testes de integração
+        working-directory: apps/api
+        run: npm run test:integration
 
   web:
     name: Web (lint + typecheck + build)
