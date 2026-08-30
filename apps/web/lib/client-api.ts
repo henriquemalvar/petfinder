@@ -1,6 +1,5 @@
 "use client";
 
-import { API_URL } from "@/lib/utils";
 import type { AuthResponse } from "@/lib/types";
 
 export async function clientLogin(email: string, password: string) {
@@ -49,36 +48,13 @@ export async function clientLogout() {
 export async function clientUpload(file: File) {
   const formData = new FormData();
   formData.append("file", file);
-  const res = await fetch(`${API_URL}/api/uploads`, {
+  const res = await fetch("/api/uploads", {
     method: "POST",
     body: formData,
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Erro no upload");
-  return res.json() as Promise<{ url: string }>;
-}
-
-export async function clientCreateAnnouncement(data: unknown) {
-  const res = await fetch(`${API_URL}/api/announcements`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(data),
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || "Erro ao publicar");
+    throw new Error(body.error || "Erro no upload");
   }
-  return res.json();
-}
-
-export async function clientCreateComment(postId: string, text: string) {
-  const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ text }),
-  });
-  if (!res.ok) throw new Error("Erro ao comentar");
-  return res.json();
+  return res.json() as Promise<{ url: string }>;
 }
