@@ -45,7 +45,7 @@ jobs:
         run: npm run test:integration
 
   web:
-    name: Web (lint + typecheck + build)
+    name: Web (lint + typecheck + testes + build)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,5 +60,7 @@ jobs:
         run: npm run lint --workspace=@petfinder/web
       - name: Typecheck
         run: npx tsc --noEmit -p apps/web/tsconfig.json
+      - name: Testes
+        run: npm test --workspace=@petfinder/web
       - name: Build
         run: npm run build --workspace=@petfinder/web
