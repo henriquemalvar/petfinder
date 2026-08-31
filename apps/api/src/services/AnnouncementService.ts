@@ -1,16 +1,21 @@
-import { PetGender, PetSize, PostStatus, PostType } from '@prisma/client';
-import { prisma } from '../config/prisma';
+import { PetGender, PetSize, PostStatus, PostType, Prisma } from '@prisma/client';
+import { AnnouncementRepository, CreatedAnnouncement } from '../repositories/AnnouncementRepository';
 import { CreateAnnouncementInput } from '../schemas/announcement.schema';
 import { NotificationService } from './NotificationService';
 
 export class AnnouncementService {
+  private repository: AnnouncementRepository;
   private notificationService: NotificationService;
 
-  constructor() {
-    this.notificationService = new NotificationService();
+  constructor(
+    repository: AnnouncementRepository = new AnnouncementRepository(),
+    notificationService: NotificationService = new NotificationService()
+  ) {
+    this.repository = repository;
+    this.notificationService = notificationService;
   }
 
-  async create(userId: string, data: CreateAnnouncementInput) {
+  async create(userId: string, data: CreateAnnouncementInput): Promise<CreatedAnnouncement> {
     const { type, pet, title, content, whatsapp, instagram, contactPreference } = data;
 
     const defaultTitles: Record<PostType, string> = {
@@ -25,63 +30,38 @@ export class AnnouncementService {
       ADOPTION: `${pet.description}. Procura um lar amoroso e responsável.`,
     };
 
-    const result = await prisma.$transaction(async (tx) => {
-      if (whatsapp || instagram || contactPreference) {
-        await tx.user.update({
-          where: { id: userId },
-          data: {
-            ...(whatsapp && { whatsapp }),
-            ...(instagram && { instagram }),
-            ...(contactPreference && { contactPreference }),
-          },
-        });
-      }
+    const contact: Prisma.UserUpdateInput = {
+      ...(whatsapp && { whatsapp }),
+      ...(instagram && { instagram }),
+      ...(contactPreference && { contactPreference }),
+    };
 
-      const createdPet = await tx.pet.create({
-        data: {
-          name: pet.name,
-          type: pet.type,
-          breed: pet.breed,
-          age: pet.age,
-          gender: pet.gender as PetGender,
-          size: pet.size as PetSize,
-          image: pet.image,
-          description: pet.description,
-          castrated: pet.castrated,
-          vaccinated: pet.vaccinated,
-          location: pet.location,
-          latitude: pet.latitude,
-          longitude: pet.longitude,
-          userId,
-        },
-      });
-
-      const createdPost = await tx.post.create({
-        data: {
-          title: title ?? defaultTitles[type as PostType],
-          content: content ?? defaultContents[type as PostType],
-          type: type as PostType,
-          status: PostStatus.ACTIVE,
-          petId: createdPet.id,
-          userId,
-        },
-        include: {
-          pet: true,
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              avatar: true,
-              whatsapp: true,
-              instagram: true,
-              contactPreference: true,
-            },
-          },
-        },
-      });
-
-      return createdPost;
+    const result = await this.repository.create({
+      userId,
+      contact: Object.keys(contact).length ? contact : null,
+      pet: {
+        name: pet.name,
+        type: pet.type,
+        breed: pet.breed,
+        age: pet.age,
+        gender: pet.gender as PetGender,
+        size: pet.size as PetSize,
+        image: pet.image,
+        description: pet.description,
+        castrated: pet.castrated,
+        vaccinated: pet.vaccinated,
+        location: pet.location,
+        latitude: pet.latitude,
+        longitude: pet.longitude,
+        userId,
+      },
+      post: {
+        title: title ?? defaultTitles[type as PostType],
+        content: content ?? defaultContents[type as PostType],
+        type: type as PostType,
+        status: PostStatus.ACTIVE,
+        userId,
+      },
     });
 
     // Fire-and-forget: notificar não pode falhar a criação do anúncio.

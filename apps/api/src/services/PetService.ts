@@ -1,17 +1,19 @@
-import { PrismaClient } from '@prisma/client';
-import { prisma } from '../config/prisma';
 import { StatusCodes } from 'http-status-codes';
 import { AppError } from '../errors/AppError';
 import { PetRepository } from '../repositories/PetRepository';
+import { UserRepository } from '../repositories/UserRepository';
 import { CreatePetDTO, Paginated, Pagination, PetCreate, PetResponse, UpdatePetDTO } from '../types';
 
 export class PetService {
   private repository: PetRepository;
-  private prisma: PrismaClient;
+  private userRepository: UserRepository;
 
-  constructor(repository: PetRepository = new PetRepository()) {
+  constructor(
+    repository: PetRepository = new PetRepository(),
+    userRepository: UserRepository = new UserRepository()
+  ) {
     this.repository = repository;
-    this.prisma = prisma;
+    this.userRepository = userRepository;
   }
 
   async findAll(pagination?: Pagination): Promise<Paginated<PetResponse>> {
@@ -61,10 +63,7 @@ export class PetService {
   }
 
   async findByUserId(userId: string, pagination?: Pagination): Promise<Paginated<PetResponse>> {
-    // Verifica se o usuário existe
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId }
-    });
+    const user = await this.userRepository.findById(userId);
 
     if (!user) {
       throw new AppError('Usuário não encontrado', StatusCodes.NOT_FOUND);

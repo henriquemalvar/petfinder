@@ -1,9 +1,13 @@
-import { Post, PrismaClient } from '@prisma/client';
+import { Post, Prisma, PrismaClient } from '@prisma/client';
 import { USER_SELECT } from '../constants/prismaSelect';
 import { CreatePostDTO, Paginated, Pagination, PostFilters, UpdatePostDTO } from '../types';
 import { buildPaginated, resolvePagination } from '../utils/pagination';
 import { IRepository } from './interfaces/IRepository';
 import { prisma } from '../config/prisma';
+
+export type PostWithRelations = Prisma.PostGetPayload<{
+  include: { pet: true; user: { select: typeof USER_SELECT } };
+}>;
 
 export class PostRepository implements IRepository<Post> {
   private prisma: PrismaClient;
@@ -31,7 +35,7 @@ export class PostRepository implements IRepository<Post> {
     return buildPaginated(posts, total, page, limit);
   }
 
-  async findById(id: string): Promise<Post | null> {
+  async findById(id: string): Promise<PostWithRelations | null> {
     return this.prisma.post.findUnique({
       where: { id },
       include: {

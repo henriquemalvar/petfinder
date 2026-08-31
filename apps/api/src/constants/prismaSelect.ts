@@ -9,3 +9,9 @@ export const USER_SELECT = {
   createdAt: true,
   updatedAt: true
 } as const;
+
+export const PUBLIC_AUTHOR_SELECT = {
+  id: true,
+  name: true,
+  avatar: true
+} as const;

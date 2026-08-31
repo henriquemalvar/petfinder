@@ -1,10 +1,10 @@
-import { USER_SELECT } from '../constants/prismaSelect';
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import * as jwt from 'jsonwebtoken';
-import { UserResponse } from '../types';
-import { prisma } from '../config/prisma';
+import { UserRepository } from '../repositories/UserRepository';
 import { getJwtSecret } from '../config/env';
+
+const userRepository = new UserRepository();
 
 
 interface TokenPayload {
@@ -42,17 +42,14 @@ export const authMiddleware = async (
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      select: USER_SELECT
-    });
+    const user = await userRepository.findPublicById(payload.id);
 
     if (!user) {
       res.status(StatusCodes.UNAUTHORIZED).json({ error: 'Usuário não encontrado' });
       return;
     }
 
-    req.user = user as UserResponse;
+    req.user = user;
     next();
   } catch (error) {
     next(error);

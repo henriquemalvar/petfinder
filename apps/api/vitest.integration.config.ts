@@ -13,6 +13,7 @@ export default defineConfig({
       DATABASE_URL: TEST_DATABASE_URL,
       DIRECT_URL: TEST_DATABASE_URL,
       JWT_SECRET: 'integration-test-secret',
+      AUTH_RATE_LIMIT_MAX: '100000',
     },
   },
 });

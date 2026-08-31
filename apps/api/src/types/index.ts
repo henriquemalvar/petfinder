@@ -144,6 +144,10 @@ export interface UpdatePostDTO {
 
 // Tipos para resposta (sem senha)
 export type UserResponse = Omit<User, 'password'>;
+export type AuthenticatedUser = Pick<
+  User,
+  'id' | 'name' | 'email' | 'avatar' | 'whatsapp' | 'instagram' | 'contactPreference' | 'createdAt' | 'updatedAt'
+>;
 export type PetResponse = Omit<Pet, 'user' | 'posts'> & {
   user: Pick<User, 'id' | 'name' | 'email' | 'avatar' | 'whatsapp' | 'instagram' | 'contactPreference' | 'createdAt' | 'updatedAt'>;
   posts: Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'type' | 'status' | 'title' | 'content' | 'petId' | 'userId'>[];
@@ -186,3 +190,16 @@ export type Notification = {
   user?: User;
   post?: Post;
 };
+
+export interface BoundingBox {
+  minLat: number;
+  maxLat: number;
+  minLon: number;
+  maxLon: number;
+}
+
+export interface GeolocatedUser {
+  id: string;
+  latitude: number | null;
+  longitude: number | null;
+}
