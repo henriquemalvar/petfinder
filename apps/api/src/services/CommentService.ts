@@ -1,7 +1,6 @@
-import { Comment } from '@prisma/client';
 import { StatusCodes } from 'http-status-codes';
 import { AppError } from '../errors/AppError';
-import { CommentRepository } from '../repositories/CommentRepository';
+import { CommentRepository, CommentWithAuthor } from '../repositories/CommentRepository';
 import { PostRepository } from '../repositories/PostRepository';
 
 export class CommentService {
@@ -24,13 +23,13 @@ export class CommentService {
     }
   }
 
-  async findByPostId(postId: string): Promise<Comment[]> {
+  async findByPostId(postId: string): Promise<CommentWithAuthor[]> {
     await this.assertPostExists(postId);
 
     return this.repository.findByPostId(postId);
   }
 
-  async create(postId: string, userId: string, text: string): Promise<Comment> {
+  async create(postId: string, userId: string, text: string): Promise<CommentWithAuthor> {
     await this.assertPostExists(postId);
 
     return this.repository.create(postId, userId, text);
