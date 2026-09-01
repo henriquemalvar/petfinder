@@ -4,7 +4,7 @@ import { PetFinderLogo } from "@/components/brand/PetFinderLogo";
 export function Footer() {
   return (
     <footer className="border-t border-border bg-surface-container mt-16">
-      <div className="mx-auto max-w-7xl px-4 py-12 md:px-6">
+      <div className="page-container py-12">
         <div className="grid gap-8 md:grid-cols-3">
           <div>
             <PetFinderLogo size="sm" />

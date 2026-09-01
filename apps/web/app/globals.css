@@ -42,6 +42,9 @@
 }
 
 @layer base {
+  :root {
+    --page-max-width: 1600px;
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -54,6 +57,16 @@
 }
 
 @layer utilities {
+  .page-container {
+    margin-inline: auto;
+    max-width: var(--page-max-width);
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .page-container {
+      padding-inline: 1.5rem;
+    }
+  }
   .glass-card {
     background: color-mix(in srgb, var(--card) 70%, transparent);
     backdrop-filter: blur(12px);

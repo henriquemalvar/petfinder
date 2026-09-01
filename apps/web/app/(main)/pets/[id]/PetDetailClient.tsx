@@ -58,7 +58,7 @@ export function PetDetailClient({ post, initialComments }: PetDetailClientProps)
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
+    <div className="page-container py-8">
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="relative aspect-square overflow-hidden rounded-2xl">
           <Image src={image} alt={post.pet.name} fill className="object-cover" priority />

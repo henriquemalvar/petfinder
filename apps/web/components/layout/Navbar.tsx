@@ -53,7 +53,7 @@ export function Navbar({ user }: NavbarProps) {
 
   return (
     <header className="sticky top-0 z-50 glass-card border-b border-border/50">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 md:px-6">
+      <div className="page-container flex h-20 items-center justify-between">
         <PetFinderLogo />
 
         <nav className="hidden items-center gap-8 md:flex">
