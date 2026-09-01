@@ -174,7 +174,7 @@ export function AccountSecurity({ userId }: AccountSecurityProps) {
                   handleDelete();
                 }}
                 disabled={deleting}
-                className="bg-destructive text-white hover:bg-destructive/90"
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 {deleting ? "Excluindo..." : "Excluir definitivamente"}
               </AlertDialogAction>
