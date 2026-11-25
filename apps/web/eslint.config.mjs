@@ -9,7 +9,7 @@ const compat = new FlatCompat({ baseDirectory: __dirname });
 
 const eslintConfig = [
   {
-    ignores: ['.next/**', 'node_modules/**', 'next-env.d.ts', 'cypress/videos/**', 'cypress/screenshots/**'],
+    ignores: ['.next/**', 'node_modules/**', 'next-env.d.ts', 'cypress/videos/**', 'cypress/screenshots/**', '**/.remember/**'],
   },
   ...compat.extends('next/core-web-vitals', 'next/typescript'),
 ];

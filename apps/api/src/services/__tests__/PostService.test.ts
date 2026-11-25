@@ -62,13 +62,13 @@ describe('PostService notificação', () => {
     expect(notificationService.notifyNearbyUsers).not.toHaveBeenCalled();
   });
 
-  it('notifica quando o anúncio segue ativo após a edição', async () => {
+  it('não notifica ao editar um anúncio ativo (evita spam no sino dos vizinhos)', async () => {
     const { service, repository, notificationService } = buildDeps();
     repository.findById.mockResolvedValue({ id: 'p1', userId: 'owner' });
     repository.update.mockResolvedValue({ id: 'p1', userId: 'owner', status: 'ACTIVE' });
 
     await service.update('p1', { content: 'novo texto do anúncio' } as any, 'owner');
 
-    expect(notificationService.notifyNearbyUsers).toHaveBeenCalledWith('p1');
+    expect(notificationService.notifyNearbyUsers).not.toHaveBeenCalled();
   });
 });

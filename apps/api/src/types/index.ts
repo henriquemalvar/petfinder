@@ -17,7 +17,6 @@ export type User = {
   updatedAt: Date;
   pets?: Pet[];
   posts?: Post[];
-  tokens?: NotificationToken[];
   notifications?: Notification[];
 };
 
@@ -150,6 +149,19 @@ export type PetResponse = Omit<Pet, 'user' | 'posts'> & {
   posts: Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'type' | 'status' | 'title' | 'content' | 'petId' | 'userId'>[];
 };
 
+export interface Pagination {
+  page?: number;
+  limit?: number;
+}
+
+export interface Paginated<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 // Tipos para filtros
 export interface PostFilters {
   type?: PostType;
@@ -173,13 +185,4 @@ export type Notification = {
   createdAt: Date;
   user?: User;
   post?: Post;
-};
-
-export type NotificationToken = {
-  id: string;
-  token: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  user?: User;
 };

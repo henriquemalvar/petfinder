@@ -24,7 +24,6 @@ function coordsFor(location: string, index: number) {
 async function main() {
   // Limpar o banco de dados
   await prisma.notification.deleteMany();
-  await prisma.notificationToken.deleteMany();
   await prisma.post.deleteMany();
   await prisma.pet.deleteMany();
   await prisma.user.deleteMany();
@@ -394,18 +393,6 @@ async function main() {
     })
   );
 
-  // Criar tokens de notificação para cada usuário
-  const notificationTokens = await Promise.all(
-    users.map((user) =>
-      prisma.notificationToken.create({
-        data: {
-          token: `expo-token-${user.id}`,
-          userId: user.id,
-        },
-      })
-    )
-  );
-
   // Criar algumas notificações de exemplo
   const notifications = await Promise.all(
     posts.slice(0, 5).map((post) =>
@@ -423,7 +410,6 @@ async function main() {
   console.log(`Criados ${users.length} usuários`);
   console.log(`Criados ${pets.length} pets`);
   console.log(`Criados ${posts.length} posts`);
-  console.log(`Criados ${notificationTokens.length} tokens de notificação`);
   console.log(`Criados ${notifications.length} notificações`);
 }
 

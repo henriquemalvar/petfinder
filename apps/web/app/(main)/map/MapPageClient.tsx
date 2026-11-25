@@ -3,7 +3,8 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Navigation } from "lucide-react";
+import { MapPin, LocateFixed } from "lucide-react";
+import { toast } from "sonner";
 import type { ApiPost, PostType } from "@/lib/types";
 import { MapWrapper } from "@/components/map/MapWrapper";
 import { MapLegend } from "@/components/map/MapLegend";
@@ -29,6 +30,8 @@ const filters: { value: PostType | "ALL"; label: string }[] = [
 export function MapPageClient({ initialPosts, isDemo = false }: MapPageClientProps) {
   const [filter, setFilter] = useState<PostType | "ALL">("ALL");
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
   const filtered = filter === "ALL"
@@ -46,20 +49,21 @@ export function MapPageClient({ initialPosts, isDemo = false }: MapPageClientPro
   }
 
   function handleLocate() {
-    if (!navigator.geolocation) return;
+    if (!navigator.geolocation) {
+      toast.error("Geolocalização não é suportada neste navegador.");
+      return;
+    }
+    setLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const nearest = withCoords.reduce<{ post: ApiPost; dist: number } | null>((best, post) => {
-          const dist = Math.hypot(
-            (post.pet.latitude! - pos.coords.latitude) * 111,
-            (post.pet.longitude! - pos.coords.longitude) * 111,
-          );
-          if (!best || dist < best.dist) return { post, dist };
-          return best;
-        }, null);
-        if (nearest) handleSelectPost(nearest.post);
+        setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
       },
-      () => undefined,
+      () => {
+        toast.error("Não foi possível obter sua localização.");
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000 },
     );
   }
 
@@ -72,6 +76,7 @@ export function MapPageClient({ initialPosts, isDemo = false }: MapPageClientPro
           selectedPostId={selectedPostId}
           onSelectPost={handleSelectPost}
           isDemo={isDemo}
+          userLocation={userLocation}
         />
         <MapLegend />
         <Button
@@ -80,9 +85,15 @@ export function MapPageClient({ initialPosts, isDemo = false }: MapPageClientPro
           variant="secondary"
           className="absolute right-4 top-4 z-[1000] h-10 w-10 rounded-xl shadow-lg"
           onClick={handleLocate}
-          aria-label="Alerta mais próximo"
+          disabled={locating}
+          aria-label="Minha localização"
+          title="Minha localização"
         >
-          <Navigation className="h-4 w-4" />
+          {locating ? (
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+          ) : (
+            <LocateFixed className="h-4 w-4" />
+          )}
         </Button>
       </div>
 

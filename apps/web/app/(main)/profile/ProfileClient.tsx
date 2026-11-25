@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MyAnnouncementCard } from "@/components/pets/MyAnnouncementCard";
+import { AccountSecurity } from "@/components/profile/AccountSecurity";
 import { clientUpload } from "@/lib/client-api";
 import type { ApiPost, ApiUser } from "@/lib/types";
 
@@ -29,6 +30,9 @@ export function ProfileClient({ user, posts }: ProfileClientProps) {
   const [name, setName] = useState(user.name);
   const [whatsapp, setWhatsapp] = useState(user.whatsapp ?? "");
   const [instagram, setInstagram] = useState(user.instagram ?? "");
+  const [contactPreference, setContactPreference] = useState(
+    user.contactPreference === "INSTAGRAM" ? "INSTAGRAM" : "WHATSAPP",
+  );
   const [avatar, setAvatar] = useState(user.avatar ?? "");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -52,10 +56,16 @@ export function ProfileClient({ user, posts }: ProfileClientProps) {
     e.preventDefault();
     setSaving(true);
     try {
+      // whatsapp/instagram são string simples e aceitam "" (permite limpar o
+      // campo). avatar tem validação de URL na API, então só vai se houver,
+      // senão uma string vazia quebra o update.
+      const payload: Record<string, string> = { name, whatsapp, instagram, contactPreference };
+      if (avatar) payload.avatar = avatar;
+
       const res = await fetch(`/api/users/${user.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, whatsapp, instagram, avatar }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error();
       toast.success("Perfil atualizado!");
@@ -141,6 +151,21 @@ export function ProfileClient({ user, posts }: ProfileClientProps) {
                 placeholder="@usuario"
               />
             </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="contactPreference">Contato preferido</Label>
+              <select
+                id="contactPreference"
+                value={contactPreference}
+                onChange={(e) => setContactPreference(e.target.value)}
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="WHATSAPP">WhatsApp</option>
+                <option value="INSTAGRAM">Instagram</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Aparece como botão principal na página do seu anúncio.
+              </p>
+            </div>
             <Button type="submit" className="w-full" disabled={saving}>
               {saving ? "Salvando..." : "Salvar alterações"}
             </Button>
@@ -178,6 +203,8 @@ export function ProfileClient({ user, posts }: ProfileClientProps) {
           )}
         </div>
       </div>
+
+      <AccountSecurity userId={user.id} />
     </div>
   );
 }

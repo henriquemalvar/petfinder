@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Share2, Phone, MapPin, CheckCircle2 } from "lucide-react";
+import { Share2, MapPin, CheckCircle2 } from "lucide-react";
 import type { ApiComment, ApiPost } from "@/lib/types";
 import { formatDate, POST_TYPE_LABEL } from "@/lib/utils";
 import { StatusChip } from "@/components/pets/StatusChip";
+import { ContactActions } from "@/components/pets/ContactActions";
 import { MapWrapper } from "@/components/map/MapWrapper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,13 +92,12 @@ export function PetDetailClient({ post, initialComments }: PetDetailClientProps)
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            {!inactive && post.user.whatsapp && (
-              <a href={`https://wa.me/${post.user.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
-                <Button className="rounded-xl">
-                  <Phone className="mr-2 h-4 w-4" />
-                  Contatar dono
-                </Button>
-              </a>
+            {!inactive && (
+              <ContactActions
+                whatsapp={post.user.whatsapp}
+                instagram={post.user.instagram}
+                contactPreference={post.user.contactPreference}
+              />
             )}
             <Button variant="outline" className="rounded-xl" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" />

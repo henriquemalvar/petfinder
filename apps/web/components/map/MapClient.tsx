@@ -51,9 +51,18 @@ function FitBounds({
   variant?: "default" | "hero";
 }) {
   const map = useMap();
+  // Chave estável pelo conteúdo (ids + coords). Sem isso, `posts` chega como
+  // um array novo a cada render (o pai recalcula withCoords toda vez), o memo
+  // quebrava e o fitBounds re-enquadrava pro Brasil a cada clique num pet,
+  // causando o zoom-out-e-volta. Agora só re-enquadra quando o conjunto de
+  // pins muda de fato (carga inicial, troca de filtro).
+  const pointsKey = posts
+    .map((p) => `${p.id}:${p.pet.latitude},${p.pet.longitude}`)
+    .join("|");
   const points = useMemo(
     () => posts.filter((p) => p.pet.latitude != null && p.pet.longitude != null),
-    [posts],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pointsKey],
   );
 
   useEffect(() => {
@@ -112,20 +121,26 @@ function FitBounds({
   return null;
 }
 
-function FlyToSelected({
-  post,
-  zoom = 15,
-}: {
-  post: ApiPost | null;
-  zoom?: number;
-}) {
+function FlyToSelected({ post }: { post: ApiPost | null }) {
   const map = useMap();
 
   useEffect(() => {
-    if (post?.pet.latitude != null && post?.pet.longitude != null) {
-      map.flyTo([post.pet.latitude, post.pet.longitude], zoom, { duration: 0.7 });
+    if (post?.pet.latitude == null || post?.pet.longitude == null) return;
+    const target = L.latLng(post.pet.latitude, post.pet.longitude);
+
+    // Se o pet já está confortavelmente na vista atual (mesma cidade, por
+    // ex.), só desliza até ele mantendo o zoom.
+    if (map.getBounds().pad(-0.2).contains(target)) {
+      map.panTo(target, { animate: true, duration: 0.5 });
+      return;
     }
-  }, [map, post, zoom]);
+
+    // Pet fora da vista: vai direto pra ele num zoom de cidade. Usamos setView
+    // em vez de flyTo de propósito: o flyTo faz o arco de "afastar até o
+    // espaço e mergulhar", que é a animação longa que não queremos. O setView
+    // faz um pan/zoom direto (em saltos grandes vai instantâneo).
+    map.setView(target, Math.max(map.getZoom(), 13), { animate: true, duration: 0.5 });
+  }, [map, post]);
 
   return null;
 }
@@ -146,6 +161,37 @@ function OpenSelectedPopup({
   return null;
 }
 
+function UserLocation({
+  location,
+}: {
+  location: { lat: number; lng: number } | null;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!location) return;
+    map.flyTo([location.lat, location.lng], Math.max(map.getZoom(), 13), {
+      duration: 0.8,
+    });
+  }, [map, location]);
+
+  if (!location) return null;
+
+  return (
+    <Marker
+      position={[location.lat, location.lng]}
+      interactive={false}
+      keyboard={false}
+      icon={L.divIcon({
+        html: '<span class="user-location-marker__halo"></span><span class="user-location-marker__pulse"></span><span class="user-location-marker__dot"></span>',
+        className: "user-location-marker",
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
+      })}
+    />
+  );
+}
+
 interface MapClientProps {
   posts: ApiPost[];
   className?: string;
@@ -155,6 +201,7 @@ interface MapClientProps {
   onSelectPost?: (post: ApiPost | null) => void;
   showLegend?: boolean;
   isDemo?: boolean;
+  userLocation?: { lat: number; lng: number } | null;
 }
 
 export default function MapClient({
@@ -165,6 +212,7 @@ export default function MapClient({
   selectedPostId = null,
   onSelectPost,
   isDemo = false,
+  userLocation = null,
 }: MapClientProps) {
   const markerRefs = useRef<Record<string, L.Marker>>({});
   const cursorElRef = useRef<HTMLDivElement>(null);
@@ -219,6 +267,7 @@ export default function MapClient({
       >
         <ThemeTileLayer />
         {withCoords.length > 0 && <FitBounds posts={withCoords} variant={variant} />}
+        <UserLocation location={userLocation} />
         {heroTour && (
           <HeroMapTour
             posts={withCoords}

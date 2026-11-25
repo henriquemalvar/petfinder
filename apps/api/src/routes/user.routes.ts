@@ -1,10 +1,45 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/UserController';
 import { validate } from '../middlewares/validate';
-import { createUserSchema, updateUserSchema } from '../schemas/user.schema';
+import { changePasswordSchema, createUserSchema, updateUserSchema } from '../schemas/user.schema';
 
 const router = Router();
 const userController = new UserController();
+
+/**
+ * @swagger
+ * /api/users/change-password:
+ *   post:
+ *     tags:
+ *       - Usuários
+ *     summary: Troca a senha do usuário logado
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 format: password
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       204:
+ *         description: Senha alterada com sucesso
+ *       400:
+ *         description: Conta sem senha (login Google) ou dados inválidos
+ *       401:
+ *         description: Senha atual incorreta
+ */
+router.post('/change-password', validate(changePasswordSchema), userController.changePassword);
 
 /**
  * @swagger
