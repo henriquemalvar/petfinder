@@ -6,9 +6,11 @@ import morgan from 'morgan';
 import { swaggerDocs, swaggerSetup } from './config/swagger';
 import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler';
+import { validateEnv } from './config/env';
 
 // Configuração das variáveis de ambiente
 dotenv.config();
+validateEnv();
 
 const app = express();
 
@@ -42,3 +44,4 @@ app.use('/api', routes);
 app.use(errorHandler);
 
 export { app };
+export default app;
