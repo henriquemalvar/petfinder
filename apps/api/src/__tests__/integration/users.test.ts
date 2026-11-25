@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { app, registerUser, request } from './helpers';
+import { afterEach, describe, expect, it } from 'vitest';
+import { app, registerUser, request, TestUser } from './helpers';
 
 describe('POST /api/users/change-password', () => {
   it('recusa a troca quando a senha atual está errada', async () => {
@@ -130,5 +130,63 @@ describe('PUT /api/users/:id', () => {
       .send({ name: 'Nome Novo' });
 
     expect(res.body).not.toHaveProperty('password');
+  });
+});
+
+describe('conta demo', () => {
+  afterEach(() => {
+    delete process.env.DEMO_USER_EMAIL;
+  });
+
+  async function registerDemo(): Promise<TestUser> {
+    const demo = await registerUser();
+    process.env.DEMO_USER_EMAIL = demo.email;
+    return demo;
+  }
+
+  it('não troca a senha e continua entrando com a original', async () => {
+    const demo = await registerDemo();
+
+    const res = await request(app)
+      .post('/api/users/change-password')
+      .set('Authorization', `Bearer ${demo.token}`)
+      .send({ currentPassword: 'senha123', newPassword: 'novaSenha123' });
+    expect(res.status).toBe(403);
+
+    const login = await request(app)
+      .post('/api/auth/login')
+      .send({ email: demo.email, password: 'senha123' });
+    expect(login.status).toBe(200);
+  });
+
+  it('não exclui a própria conta', async () => {
+    const demo = await registerDemo();
+
+    const res = await request(app)
+      .delete(`/api/users/${demo.id}`)
+      .set('Authorization', `Bearer ${demo.token}`)
+      .send({ password: 'senha123' });
+    expect(res.status).toBe(403);
+
+    const login = await request(app)
+      .post('/api/auth/login')
+      .send({ email: demo.email, password: 'senha123' });
+    expect(login.status).toBe(200);
+  });
+
+  it('não troca o e-mail pelo perfil, mas troca o nome', async () => {
+    const demo = await registerDemo();
+
+    const email = await request(app)
+      .put(`/api/users/${demo.id}`)
+      .set('Authorization', `Bearer ${demo.token}`)
+      .send({ email: 'outro@petfinder.test' });
+    expect(email.status).toBe(403);
+
+    const nome = await request(app)
+      .put(`/api/users/${demo.id}`)
+      .set('Authorization', `Bearer ${demo.token}`)
+      .send({ name: 'Visitante Demo' });
+    expect(nome.status).toBe(200);
   });
 });

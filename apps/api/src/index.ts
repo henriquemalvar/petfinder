@@ -3,8 +3,11 @@ import { validateEnv } from './config/env';
 
 validateEnv();
 
-const PORT = process.env.PORT || 3333;
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 3333;
+  app.listen(PORT, () => {
+    console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  });
+}
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-});
+export default app;

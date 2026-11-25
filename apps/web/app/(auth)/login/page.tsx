@@ -12,6 +12,9 @@ import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { Separator } from "@/components/ui/separator";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { safeRedirect } from "@/lib/utils";
+import { demoCredentials } from "@/lib/demo-account";
+
+const DEMO = demoCredentials();
 
 function LoginForm() {
   const router = useRouter();
@@ -20,11 +23,10 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function signIn(loginEmail: string, loginPassword: string) {
     setLoading(true);
     try {
-      await clientLogin(email, password);
+      await clientLogin(loginEmail, loginPassword);
       toast.success("Entrada realizada!");
       router.push(safeRedirect(searchParams.get("redirect")));
       router.refresh();
@@ -33,6 +35,11 @@ function LoginForm() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    void signIn(email, password);
   }
 
   return (
@@ -80,8 +87,20 @@ function LoginForm() {
         <span className="text-xs text-muted-foreground">ou</span>
         <Separator className="flex-1" />
       </div>
-      <div className="mt-4">
+      <div className="mt-4 space-y-3">
         <GoogleSignInButton redirect={safeRedirect(searchParams.get("redirect"))} />
+        {DEMO && (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="w-full rounded-xl"
+            disabled={loading}
+            onClick={() => void signIn(DEMO.email, DEMO.password)}
+          >
+            Entrar como visitante demo
+          </Button>
+        )}
       </div>
     </AuthCard>
   );
