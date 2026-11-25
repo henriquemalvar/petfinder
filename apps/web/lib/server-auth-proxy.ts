@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { API_URL } from "@/lib/utils";
 import { startSession } from "@/lib/server-session";
 
+export const PLATFORM_CLIENT_IP_HEADER = "x-vercel-forwarded-for";
+
 export function visitorIp(request: NextRequest): string | undefined {
-  const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  return forwarded || request.headers.get("x-real-ip")?.trim() || undefined;
+  return request.headers.get(PLATFORM_CLIENT_IP_HEADER)?.split(",")[0]?.trim() || undefined;
 }
 
 export function clientIpHeaders(request: NextRequest): Record<string, string> {

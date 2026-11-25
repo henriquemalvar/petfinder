@@ -11,12 +11,14 @@ afterEach(() => {
 });
 
 describe('visitorIp', () => {
-  it('usa o primeiro endereço do x-forwarded-for', () => {
-    expect(visitorIp(requestWith({ 'x-forwarded-for': '200.1.1.1, 10.0.0.1' }))).toBe('200.1.1.1');
+  it('usa o IP que a Vercel grava em x-vercel-forwarded-for', () => {
+    expect(visitorIp(requestWith({ 'x-vercel-forwarded-for': '200.1.1.1' }))).toBe('200.1.1.1');
   });
 
-  it('cai no x-real-ip quando não há x-forwarded-for', () => {
-    expect(visitorIp(requestWith({ 'x-real-ip': '200.2.2.2' }))).toBe('200.2.2.2');
+  it('ignora x-forwarded-for e x-real-ip, que o visitante pode forjar fora da Vercel', () => {
+    expect(
+      visitorIp(requestWith({ 'x-forwarded-for': '1.2.3.4', 'x-real-ip': '5.6.7.8' })),
+    ).toBeUndefined();
   });
 
   it('devolve undefined sem nenhum cabeçalho de IP', () => {
@@ -28,14 +30,14 @@ describe('clientIpHeaders', () => {
   it('repassa o IP e o segredo quando o segredo está configurado', () => {
     process.env.AUTH_PROXY_SECRET = 'segredo';
 
-    expect(clientIpHeaders(requestWith({ 'x-forwarded-for': '200.1.1.1' }))).toEqual({
+    expect(clientIpHeaders(requestWith({ 'x-vercel-forwarded-for': '200.1.1.1' }))).toEqual({
       'x-client-ip': '200.1.1.1',
       'x-proxy-secret': 'segredo',
     });
   });
 
   it('não repassa nada sem segredo configurado', () => {
-    expect(clientIpHeaders(requestWith({ 'x-forwarded-for': '200.1.1.1' }))).toEqual({});
+    expect(clientIpHeaders(requestWith({ 'x-vercel-forwarded-for': '200.1.1.1' }))).toEqual({});
   });
 
   it('não repassa nada quando não sabe o IP do visitante', () => {
