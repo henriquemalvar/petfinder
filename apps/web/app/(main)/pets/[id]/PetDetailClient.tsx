@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Share2, Phone, MapPin, CheckCircle2 } from "lucide-react";
+import { Share2, MapPin, CheckCircle2 } from "lucide-react";
 import type { ApiComment, ApiPost } from "@/lib/types";
 import { formatDate, POST_TYPE_LABEL } from "@/lib/utils";
 import { StatusChip } from "@/components/pets/StatusChip";
+import { ContactActions } from "@/components/pets/ContactActions";
 import { MapWrapper } from "@/components/map/MapWrapper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,11 @@ export function PetDetailClient({ post, initialComments }: PetDetailClientProps)
   const [submitting, setSubmitting] = useState(false);
 
   const image = post.pet.image || "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800&h=600&fit=crop";
+  const inactive = post.status !== "ACTIVE";
+  const resolvedBanner =
+    post.status === "RESOLVED"
+      ? "Este caso foi resolvido. O anúncio não está mais ativo."
+      : "Este anúncio foi encerrado e não está mais ativo.";
 
   async function handleComment(e: React.FormEvent) {
     e.preventDefault();
@@ -52,14 +58,20 @@ export function PetDetailClient({ post, initialComments }: PetDetailClientProps)
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
+    <div className="page-container py-8">
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="relative aspect-square overflow-hidden rounded-2xl">
           <Image src={image} alt={post.pet.name} fill className="object-cover" priority />
         </div>
 
         <div>
-          <StatusChip type={post.type} pulse={post.type === "LOST"} />
+          {inactive && (
+            <div className="mb-4 flex items-center gap-2 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              {resolvedBanner}
+            </div>
+          )}
+          <StatusChip type={post.type} pulse={!inactive && post.type === "LOST"} />
           <h1 className="mt-4 text-3xl font-bold md:text-4xl">{post.pet.name}</h1>
           <p className="mt-2 text-muted-foreground">
             {post.pet.breed} · {post.pet.age} · {POST_TYPE_LABEL[post.type]}
@@ -80,13 +92,12 @@ export function PetDetailClient({ post, initialComments }: PetDetailClientProps)
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            {post.user.whatsapp && (
-              <a href={`https://wa.me/${post.user.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer">
-                <Button className="rounded-xl">
-                  <Phone className="mr-2 h-4 w-4" />
-                  Contatar dono
-                </Button>
-              </a>
+            {!inactive && (
+              <ContactActions
+                whatsapp={post.user.whatsapp}
+                instagram={post.user.instagram}
+                contactPreference={post.user.contactPreference}
+              />
             )}
             <Button variant="outline" className="rounded-xl" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" />
@@ -116,17 +127,19 @@ export function PetDetailClient({ post, initialComments }: PetDetailClientProps)
 
       <section className="mt-12">
         <h2 className="text-xl font-bold">Avistamentos da comunidade ({comments.length})</h2>
-        <form onSubmit={handleComment} className="mt-4 flex gap-2">
-          <Input
-            placeholder="Reporte um avistamento..."
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            className="rounded-xl"
-          />
-          <Button type="submit" disabled={submitting} className="rounded-xl shrink-0">
-            Enviar
-          </Button>
-        </form>
+        {!inactive && (
+          <form onSubmit={handleComment} className="mt-4 flex gap-2">
+            <Input
+              placeholder="Reporte um avistamento..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              className="rounded-xl"
+            />
+            <Button type="submit" disabled={submitting} className="rounded-xl shrink-0">
+              Enviar
+            </Button>
+          </form>
+        )}
         <div className="mt-6 space-y-4">
           {comments.map((comment) => (
             <article key={comment.id} className="rounded-xl border border-border bg-card p-4">

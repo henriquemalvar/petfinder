@@ -27,7 +27,10 @@ export class PetController {
 
   findAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const pets = await this.petService.findAll();
+      const pets = await this.petService.findAll({
+        page: req.query.page ? Number(req.query.page) : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+      });
       res.status(StatusCodes.OK).json(pets);
     } catch (error) {
       next(error);
@@ -50,7 +53,7 @@ export class PetController {
     try {
       const id = String(req.params.id);
       const petData: UpdatePetDTO = req.body;
-      const pet = await this.petService.update(id, petData);
+      const pet = await this.petService.update(id, petData, req.user.id);
       res.status(StatusCodes.OK).json(pet);
     } catch (error) {
       next(error);
@@ -62,7 +65,7 @@ export class PetController {
     try {
       const id = String(req.params.id);
       const petData: Partial<UpdatePetDTO> = req.body;
-      const pet = await this.petService.update(id, petData);
+      const pet = await this.petService.update(id, petData, req.user.id);
       res.status(StatusCodes.OK).json(pet);
     } catch (error) {
       next(error);
@@ -73,7 +76,7 @@ export class PetController {
   delete = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = String(req.params.id);
-      await this.petService.delete(id);
+      await this.petService.delete(id, req.user.id);
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);
@@ -90,7 +93,10 @@ export class PetController {
         throw new AppError('Não autorizado a acessar pets de outro usuário', StatusCodes.FORBIDDEN);
       }
 
-      const pets = await this.petService.findByUserId(userId);
+      const pets = await this.petService.findByUserId(userId, {
+        page: req.query.page ? Number(req.query.page) : undefined,
+        limit: req.query.limit ? Number(req.query.limit) : undefined,
+      });
       res.status(StatusCodes.OK).json(pets);
     } catch (error) {
       next(error);

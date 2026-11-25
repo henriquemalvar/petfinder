@@ -1,8 +1,13 @@
-import { Post, PrismaClient } from '@prisma/client';
+import { Post, Prisma, PrismaClient } from '@prisma/client';
 import { USER_SELECT } from '../constants/prismaSelect';
-import { CreatePostDTO, PostFilters, UpdatePostDTO } from '../types';
+import { CreatePostDTO, Paginated, Pagination, PostFilters, UpdatePostDTO } from '../types';
+import { buildPaginated, resolvePagination } from '../utils/pagination';
 import { IRepository } from './interfaces/IRepository';
 import { prisma } from '../config/prisma';
+
+export type PostWithRelations = Prisma.PostGetPayload<{
+  include: { pet: true; user: { select: typeof USER_SELECT } };
+}>;
 
 export class PostRepository implements IRepository<Post> {
   private prisma: PrismaClient;
@@ -11,18 +16,26 @@ export class PostRepository implements IRepository<Post> {
     this.prisma = prisma;
   }
 
-  async findAll(): Promise<Post[]> {
-    return this.prisma.post.findMany({
-      include: {
-        pet: true,
-        user: {
-          select: USER_SELECT
+  async findAll(pagination: Pagination = {}): Promise<Paginated<Post>> {
+    const { page, limit, skip } = resolvePagination(pagination);
+    const [posts, total] = await Promise.all([
+      this.prisma.post.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          pet: true,
+          user: {
+            select: USER_SELECT
+          }
         }
-      }
-    });
+      }),
+      this.prisma.post.count()
+    ]);
+    return buildPaginated(posts, total, page, limit);
   }
 
-  async findById(id: string): Promise<Post | null> {
+  async findById(id: string): Promise<PostWithRelations | null> {
     return this.prisma.post.findUnique({
       where: { id },
       include: {
@@ -125,30 +138,53 @@ export class PostRepository implements IRepository<Post> {
     });
   }
 
-  async findByUserId(userId: string): Promise<Post[]> {
-    return this.prisma.post.findMany({
-      where: { userId },
-      include: {
-        pet: true,
-        user: {
-          select: USER_SELECT
+  async findByUserId(
+    userId: string,
+    pagination: Pagination = {},
+  ): Promise<Paginated<Post>> {
+    const { page, limit, skip } = resolvePagination(pagination);
+    const [posts, total] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { userId },
+        skip,
+        take: limit,
+        include: {
+          pet: true,
+          user: {
+            select: USER_SELECT
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
         }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+      }),
+      this.prisma.post.count({ where: { userId } })
+    ]);
+    return buildPaginated(posts, total, page, limit);
   }
 
-  async findByPetId(petId: string): Promise<Post[]> {
-    return this.prisma.post.findMany({
-      where: { petId },
-      include: {
-        pet: true,
-        user: {
-          select: USER_SELECT
+  async findByPetId(
+    petId: string,
+    pagination: Pagination = {},
+  ): Promise<Paginated<Post>> {
+    const { page, limit, skip } = resolvePagination(pagination);
+    const [posts, total] = await Promise.all([
+      this.prisma.post.findMany({
+        where: { petId },
+        skip,
+        take: limit,
+        include: {
+          pet: true,
+          user: {
+            select: USER_SELECT
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
         }
-      }
-    });
+      }),
+      this.prisma.post.count({ where: { petId } })
+    ]);
+    return buildPaginated(posts, total, page, limit);
   }
 }

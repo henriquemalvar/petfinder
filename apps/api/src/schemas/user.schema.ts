@@ -25,5 +25,13 @@ export const userIdParamSchema = z.object({
   })
 });
 
+export const changePasswordSchema = z.object({
+  body: z.object({
+    currentPassword: z.string().min(1, 'Informe a senha atual'),
+    newPassword: z.string().min(6, 'A nova senha deve ter no mínimo 6 caracteres')
+  })
+});
+
 export type CreateUserInput = z.infer<typeof createUserSchema>['body'];
-export type UpdateUserInput = z.infer<typeof updateUserSchema>['body']; 
+export type UpdateUserInput = z.infer<typeof updateUserSchema>['body'];
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>['body']; 

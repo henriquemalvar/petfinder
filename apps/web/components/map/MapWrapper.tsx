@@ -23,6 +23,7 @@ interface MapWrapperProps {
   selectedPostId?: string | null;
   onSelectPost?: (post: ApiPost | null) => void;
   isDemo?: boolean;
+  userLocation?: { lat: number; lng: number } | null;
 }
 
 export function MapWrapper({
@@ -33,6 +34,7 @@ export function MapWrapper({
   selectedPostId,
   onSelectPost,
   isDemo,
+  userLocation,
 }: MapWrapperProps) {
   return (
     <MapClient
@@ -43,6 +45,7 @@ export function MapWrapper({
       selectedPostId={selectedPostId}
       onSelectPost={onSelectPost}
       isDemo={isDemo}
+      userLocation={userLocation}
     />
   );
 }

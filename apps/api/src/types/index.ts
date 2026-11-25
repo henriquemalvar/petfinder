@@ -17,7 +17,6 @@ export type User = {
   updatedAt: Date;
   pets?: Pet[];
   posts?: Post[];
-  tokens?: NotificationToken[];
   notifications?: Notification[];
 };
 
@@ -145,10 +144,27 @@ export interface UpdatePostDTO {
 
 // Tipos para resposta (sem senha)
 export type UserResponse = Omit<User, 'password'>;
+export type AuthenticatedUser = Pick<
+  User,
+  'id' | 'name' | 'email' | 'avatar' | 'whatsapp' | 'instagram' | 'contactPreference' | 'createdAt' | 'updatedAt'
+>;
 export type PetResponse = Omit<Pet, 'user' | 'posts'> & {
   user: Pick<User, 'id' | 'name' | 'email' | 'avatar' | 'whatsapp' | 'instagram' | 'contactPreference' | 'createdAt' | 'updatedAt'>;
   posts: Pick<Post, 'id' | 'createdAt' | 'updatedAt' | 'type' | 'status' | 'title' | 'content' | 'petId' | 'userId'>[];
 };
+
+export interface Pagination {
+  page?: number;
+  limit?: number;
+}
+
+export interface Paginated<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 // Tipos para filtros
 export interface PostFilters {
@@ -175,11 +191,15 @@ export type Notification = {
   post?: Post;
 };
 
-export type NotificationToken = {
+export interface BoundingBox {
+  minLat: number;
+  maxLat: number;
+  minLon: number;
+  maxLon: number;
+}
+
+export interface GeolocatedUser {
   id: string;
-  token: string;
-  createdAt: Date;
-  updatedAt: Date;
-  userId: string;
-  user?: User;
-};
+  latitude: number | null;
+  longitude: number | null;
+}

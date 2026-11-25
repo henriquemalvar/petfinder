@@ -91,10 +91,25 @@ export function HeroMapTour({
     if (postIds.length === 0) return;
 
     runningRef.current = true;
-    let holdTimeout: ReturnType<typeof setTimeout> | undefined;
-    let startTimeout: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
     let rafId = 0;
     let launched = false;
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+
+    // Agenda um timer rastreado. O cleanup cancela todos de uma vez e cada
+    // callback só roda se o efeito ainda estiver ativo. Sem isso, timers
+    // sobrepostos (whenReady + moveend gravavam no mesmo handle) vazavam e
+    // chamavam latLngToContainerPoint num mapa já destruído (_mapPane
+    // undefined), estourando "_leaflet_pos".
+    const schedule = (fn: () => void, ms: number) => {
+      const id = setTimeout(() => {
+        timers.delete(id);
+        if (cancelled) return;
+        fn();
+      }, ms);
+      timers.add(id);
+      return id;
+    };
 
     const pointForPost = (post: ApiPost) => {
       const point = map.latLngToContainerPoint([post.pet.latitude!, post.pet.longitude!]);
@@ -154,7 +169,7 @@ export function HeroMapTour({
         pulseCursor(cursorElRef.current);
         onActivePost(post, target);
 
-        holdTimeout = setTimeout(() => {
+        schedule(() => {
           indexRef.current = (indexRef.current + 1) % tourPosts.length;
           runStep();
         }, HOLD_MS);
@@ -209,7 +224,7 @@ export function HeroMapTour({
               .filter((post) => post.pet.latitude != null && post.pet.longitude != null)
               .slice(0, 5);
       if (visiblePostsRef.current.length === 0) return;
-      startTimeout = setTimeout(beginTour, 500);
+      schedule(beginTour, 500);
     };
 
     const waitForMapReady = (attempt = 0) => {
@@ -217,7 +232,7 @@ export function HeroMapTour({
         tryStartTour();
         return;
       }
-      startTimeout = setTimeout(() => {
+      schedule(() => {
         if (map.getSize().x > 0) {
           tryStartTour();
           return;
@@ -238,19 +253,22 @@ export function HeroMapTour({
     };
 
     map.whenReady(() => {
+      if (cancelled) return;
       map.once("moveend", () => {
-        startTimeout = setTimeout(tryStartTour, 400);
+        if (cancelled) return;
+        schedule(tryStartTour, 400);
       });
-      startTimeout = setTimeout(waitForMapReady, 2200);
+      schedule(waitForMapReady, 2200);
     });
     map.on("resize", handleResize);
 
     return () => {
+      cancelled = true;
       runningRef.current = false;
       launched = false;
       animatingRef.current = false;
-      clearTimeout(holdTimeout);
-      clearTimeout(startTimeout);
+      timers.forEach(clearTimeout);
+      timers.clear();
       cancelAnimationFrame(rafId);
       map.off("resize", handleResize);
       onCursorVisible(false);

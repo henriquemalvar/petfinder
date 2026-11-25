@@ -1,39 +1,35 @@
 import { Notification, PrismaClient } from '@prisma/client';
-import { IRepository } from './interfaces/IRepository';
+import { prisma } from '../config/prisma';
 
-export class NotificationRepository implements IRepository<Notification> {
+export interface NotificationDraft {
+  userId: string;
+  postId: string;
+  message: string;
+}
+
+export class NotificationRepository {
   private prisma: PrismaClient;
 
   constructor() {
-    this.prisma = new PrismaClient();
+    this.prisma = prisma;
   }
 
-  async create(data: Partial<Notification>): Promise<Notification> {
-    return this.prisma.notification.create({
-      data: data as Notification,
+  async findByUserId(userId: string, take: number): Promise<Notification[]> {
+    return this.prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take
     });
   }
 
-  async findById(id: string): Promise<Notification | null> {
-    return this.prisma.notification.findUnique({
-      where: { id },
-    });
+  async createMany(drafts: NotificationDraft[]): Promise<void> {
+    await this.prisma.notification.createMany({ data: drafts });
   }
 
-  async findAll(): Promise<Notification[]> {
-    return this.prisma.notification.findMany();
-  }
-
-  async update(id: string, data: Partial<Notification>): Promise<Notification> {
-    return this.prisma.notification.update({
-      where: { id },
-      data,
-    });
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.prisma.notification.delete({
-      where: { id },
+  async markAsRead(id: string, userId: string): Promise<void> {
+    await this.prisma.notification.updateMany({
+      where: { id, userId },
+      data: { read: true }
     });
   }
 }

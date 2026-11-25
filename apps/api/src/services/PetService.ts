@@ -1,21 +1,23 @@
-import { PrismaClient } from '@prisma/client';
-import { prisma } from '../config/prisma';
 import { StatusCodes } from 'http-status-codes';
 import { AppError } from '../errors/AppError';
 import { PetRepository } from '../repositories/PetRepository';
-import { CreatePetDTO, PetCreate, PetResponse, UpdatePetDTO } from '../types';
+import { UserRepository } from '../repositories/UserRepository';
+import { CreatePetDTO, Paginated, Pagination, PetCreate, PetResponse, UpdatePetDTO } from '../types';
 
 export class PetService {
   private repository: PetRepository;
-  private prisma: PrismaClient;
+  private userRepository: UserRepository;
 
-  constructor() {
-    this.repository = new PetRepository();
-    this.prisma = prisma;
+  constructor(
+    repository: PetRepository = new PetRepository(),
+    userRepository: UserRepository = new UserRepository()
+  ) {
+    this.repository = repository;
+    this.userRepository = userRepository;
   }
 
-  async findAll(): Promise<PetResponse[]> {
-    return this.repository.findAll();
+  async findAll(pagination?: Pagination): Promise<Paginated<PetResponse>> {
+    return this.repository.findAll(pagination);
   }
 
   async findById(id: string): Promise<PetResponse> {
@@ -32,36 +34,41 @@ export class PetService {
     return this.repository.create(data as PetCreate);
   }
 
-  async update(id: string, data: UpdatePetDTO): Promise<PetResponse> {
+  async update(id: string, data: UpdatePetDTO, requesterId: string): Promise<PetResponse> {
     const pet = await this.repository.findById(id);
 
     if (!pet) {
       throw new AppError('Pet não encontrado', StatusCodes.NOT_FOUND);
+    }
+
+    if (pet.userId !== requesterId) {
+      throw new AppError('Você não tem permissão para alterar este pet', StatusCodes.FORBIDDEN);
     }
 
     return this.repository.update(id, data);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, requesterId: string): Promise<void> {
     const pet = await this.repository.findById(id);
 
     if (!pet) {
       throw new AppError('Pet não encontrado', StatusCodes.NOT_FOUND);
     }
 
+    if (pet.userId !== requesterId) {
+      throw new AppError('Você não tem permissão para remover este pet', StatusCodes.FORBIDDEN);
+    }
+
     await this.repository.delete(id);
   }
 
-  async findByUserId(userId: string): Promise<PetResponse[]> {
-    // Verifica se o usuário existe
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId }
-    });
+  async findByUserId(userId: string, pagination?: Pagination): Promise<Paginated<PetResponse>> {
+    const user = await this.userRepository.findById(userId);
 
     if (!user) {
       throw new AppError('Usuário não encontrado', StatusCodes.NOT_FOUND);
     }
 
-    return this.repository.findByUserId(userId);
+    return this.repository.findByUserId(userId, pagination);
   }
 } 

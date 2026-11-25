@@ -1,22 +1,27 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { API_URL } from "@/lib/utils";
+import { forward, toNextResponse } from "@/lib/server-proxy";
+import { endSession } from "@/lib/server-session";
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
-) {
+): Promise<NextResponse> {
   const { id } = await params;
-  const token = (await cookies()).get("token")?.value;
-  const body = await request.json();
-  const res = await fetch(`${API_URL}/api/users/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+  const res = await forward(`/api/users/${id}`, { method: "PUT", body: await request.json() });
+  return toNextResponse(res);
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<NextResponse> {
+  const { id } = await params;
+  const body = await request.json().catch(() => ({}));
+  const res = await forward(`/api/users/${id}`, { method: "DELETE", body });
+
+  if (!res.ok) {
+    return toNextResponse(res, { fallbackError: "Erro ao excluir a conta" });
+  }
+
+  return endSession(new NextResponse(null, { status: 204 }));
 }

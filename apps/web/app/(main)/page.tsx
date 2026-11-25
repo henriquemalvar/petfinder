@@ -47,7 +47,7 @@ export default async function HomePage() {
           />
         </div>
         <div id="hero-tour-overlays" className="pointer-events-none absolute inset-0 z-[5]" />
-        <div className="relative z-10 mx-auto max-w-7xl px-4 py-20 md:px-6 md:py-28">
+        <div className="page-container relative z-10 py-20 md:py-28">
           <div className="hero-card max-w-2xl rounded-2xl p-8 md:p-10">
             <h1 className="text-3xl font-bold leading-tight md:text-5xl">
               Reunindo famílias,{" "}
@@ -73,7 +73,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6">
+      <section className="page-container py-12">
         <div className="grid gap-6 md:grid-cols-3">
           <Link href="/post?type=LOST" className="group rounded-2xl border border-border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-warning/20">
@@ -108,7 +108,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6">
+      <section className="page-container py-12">
         <div className="mb-8 flex items-center justify-between">
           <h2 className="text-2xl font-bold md:text-3xl">Alertas próximos</h2>
           <Link href="/map" className="inline-flex items-center text-sm font-medium text-primary hover:underline">
@@ -132,11 +132,11 @@ export default async function HomePage() {
         )}
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6">
+      <section className="page-container py-12">
         <AdBanner />
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 md:px-6">
+      <section className="page-container py-12">
         <h2 className="mb-2 text-2xl font-bold md:text-3xl">
           Mais que um app. Uma <span className="text-secondary">comunidade</span> de cuidado.
         </h2>

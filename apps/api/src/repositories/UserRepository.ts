@@ -1,5 +1,6 @@
 import { PrismaClient, User } from '@prisma/client';
-import { CreateUserDTO, UpdateUserDTO } from '../types';
+import { USER_SELECT } from '../constants/prismaSelect';
+import { AuthenticatedUser, BoundingBox, CreateUserDTO, GeolocatedUser, UpdateUserDTO } from '../types';
 import { IRepository } from './interfaces/IRepository';
 import { prisma } from '../config/prisma';
 
@@ -25,6 +26,24 @@ export class UserRepository implements IRepository<User> {
   async findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { email }
+    });
+  }
+
+  async findPublicById(id: string): Promise<AuthenticatedUser | null> {
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: USER_SELECT
+    });
+  }
+
+  async findWithinBoundingBox(box: BoundingBox, excludeUserId: string): Promise<GeolocatedUser[]> {
+    return this.prisma.user.findMany({
+      where: {
+        id: { not: excludeUserId },
+        latitude: { gte: box.minLat, lte: box.maxLat },
+        longitude: { gte: box.minLon, lte: box.maxLon }
+      },
+      select: { id: true, latitude: true, longitude: true }
     });
   }
 

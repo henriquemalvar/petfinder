@@ -40,7 +40,7 @@ cp .env.example .env
 Edite o arquivo `.env` com suas configurações:
 - `DATABASE_URL`: URL de conexão do seu banco de dados PostgreSQL
 - `JWT_SECRET`: Chave secreta para geração dos tokens JWT
-- `PORT`: Porta onde a API irá rodar (opcional, padrão: 3000)
+- `PORT`: Porta onde a API irá rodar (opcional, padrão: 3333)
 - `CLOUDINARY_CLOUD_NAME`: Nome da sua conta no Cloudinary
 - `CLOUDINARY_API_KEY`: Chave de API do Cloudinary
 - `CLOUDINARY_API_SECRET`: Chave secreta do Cloudinary
@@ -101,7 +101,7 @@ Todas as rotas (exceto login e registro) requerem um token JWT no header `Author
 ## 📖 Uso
 
 1. Inicie o servidor com `npm run dev`.
-2. Acesse `http://localhost:3000` e utilize um cliente REST para testar as rotas.
+2. Acesse `http://localhost:3333` e utilize um cliente REST para testar as rotas.
 
 ## 🤝 Contribuição
 

@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { prisma } from '../config/prisma';
 import { USER_SELECT } from '../constants/prismaSelect';
-import { PetCreate, PetResponse } from '../types';
+import { Paginated, PetCreate, PetResponse, Pagination } from '../types';
+import { buildPaginated, resolvePagination } from '../utils/pagination';
 import { IRepository } from './interfaces/IRepository';
 
 export class PetRepository implements IRepository<PetResponse> {
@@ -11,20 +12,27 @@ export class PetRepository implements IRepository<PetResponse> {
     this.prisma = prisma;
   }
 
-  async findAll(): Promise<PetResponse[]> {
-    const pets = await this.prisma.pet.findMany({
-      include: {
-        user: {
-          select: USER_SELECT
-        },
-        posts: {
-          orderBy: {
-            createdAt: 'desc'
+  async findAll(pagination: Pagination = {}): Promise<Paginated<PetResponse>> {
+    const { page, limit, skip } = resolvePagination(pagination);
+    const [pets, total] = await Promise.all([
+      this.prisma.pet.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: USER_SELECT
+          },
+          posts: {
+            orderBy: {
+              createdAt: 'desc'
+            }
           }
         }
-      }
-    });
-    return pets;
+      }),
+      this.prisma.pet.count()
+    ]);
+    return buildPaginated(pets, total, page, limit);
   }
 
   async findById(id: string): Promise<PetResponse | null> {
@@ -85,23 +93,32 @@ export class PetRepository implements IRepository<PetResponse> {
     });
   }
 
-  async findByUserId(userId: string): Promise<PetResponse[]> {
-    const pets = await this.prisma.pet.findMany({
-      where: { userId },
-      include: {
-        user: {
-          select: USER_SELECT
-        },
-        posts: {
-          orderBy: {
-            createdAt: 'desc'
+  async findByUserId(
+    userId: string,
+    pagination: Pagination = {},
+  ): Promise<Paginated<PetResponse>> {
+    const { page, limit, skip } = resolvePagination(pagination);
+    const [pets, total] = await Promise.all([
+      this.prisma.pet.findMany({
+        where: { userId },
+        skip,
+        take: limit,
+        include: {
+          user: {
+            select: USER_SELECT
+          },
+          posts: {
+            orderBy: {
+              createdAt: 'desc'
+            }
           }
+        },
+        orderBy: {
+          createdAt: 'desc'
         }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-    return pets;
+      }),
+      this.prisma.pet.count({ where: { userId } })
+    ]);
+    return buildPaginated(pets, total, page, limit);
   }
 } 

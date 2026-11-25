@@ -61,10 +61,24 @@ export class UserController {
     }
   };
 
+  changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { currentPassword, newPassword } = req.body as {
+        currentPassword: string;
+        newPassword: string;
+      };
+      await this.userService.changePassword(req.user.id, currentPassword, newPassword);
+      res.status(StatusCodes.NO_CONTENT).send();
+    } catch (error) {
+      next(error);
+    }
+  };
+
   delete = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = String(req.params.id);
-      await this.userService.delete(id, req.user.id);
+      const { password } = (req.body ?? {}) as { password?: string };
+      await this.userService.delete(id, req.user.id, password);
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);

@@ -1,38 +1,37 @@
-import { prisma } from '../config/prisma';
 import { StatusCodes } from 'http-status-codes';
 import { AppError } from '../errors/AppError';
+import { CommentRepository, CommentWithAuthor } from '../repositories/CommentRepository';
+import { PostRepository } from '../repositories/PostRepository';
 
 export class CommentService {
-  async findByPostId(postId: string) {
-    const post = await prisma.post.findUnique({ where: { id: postId } });
-    if (!post) {
-      throw new AppError('Post não encontrado', StatusCodes.NOT_FOUND);
-    }
+  private repository: CommentRepository;
+  private postRepository: PostRepository;
 
-    return prisma.comment.findMany({
-      where: { postId },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: {
-          select: { id: true, name: true, avatar: true },
-        },
-      },
-    });
+  constructor(
+    repository: CommentRepository = new CommentRepository(),
+    postRepository: PostRepository = new PostRepository()
+  ) {
+    this.repository = repository;
+    this.postRepository = postRepository;
   }
 
-  async create(postId: string, userId: string, text: string) {
-    const post = await prisma.post.findUnique({ where: { id: postId } });
+  private async assertPostExists(postId: string): Promise<void> {
+    const post = await this.postRepository.findById(postId);
+
     if (!post) {
       throw new AppError('Post não encontrado', StatusCodes.NOT_FOUND);
     }
+  }
 
-    return prisma.comment.create({
-      data: { postId, userId, text },
-      include: {
-        user: {
-          select: { id: true, name: true, avatar: true },
-        },
-      },
-    });
+  async findByPostId(postId: string): Promise<CommentWithAuthor[]> {
+    await this.assertPostExists(postId);
+
+    return this.repository.findByPostId(postId);
+  }
+
+  async create(postId: string, userId: string, text: string): Promise<CommentWithAuthor> {
+    await this.assertPostExists(postId);
+
+    return this.repository.create(postId, userId, text);
   }
 }

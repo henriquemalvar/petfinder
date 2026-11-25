@@ -20,6 +20,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -41,6 +42,9 @@
 }
 
 @layer base {
+  :root {
+    --page-max-width: 1600px;
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -53,6 +57,16 @@
 }
 
 @layer utilities {
+  .page-container {
+    margin-inline: auto;
+    max-width: var(--page-max-width);
+    padding-inline: 1rem;
+  }
+  @media (min-width: 768px) {
+    .page-container {
+      padding-inline: 1.5rem;
+    }
+  }
   .glass-card {
     background: color-mix(in srgb, var(--card) 70%, transparent);
     backdrop-filter: blur(12px);
@@ -212,6 +226,46 @@
 
 .dark .pet-map-marker__dot {
   box-shadow: 0 4px 14px var(--pin-glow), 0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+/* Marcador "você está aqui" (minha localização) */
+.user-location-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* disco translúcido estático (o "círculo de precisão" do clássico) */
+.user-location-marker__halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: rgba(37, 99, 235, 0.15);
+}
+
+.user-location-marker__pulse {
+  position: absolute;
+  inset: 6px;
+  border-radius: 9999px;
+  background: rgba(37, 99, 235, 0.35);
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.user-location-marker__dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  height: 14px;
+  width: 14px;
+  transform: translate(-50%, -50%);
+  border-radius: 9999px;
+  background: #2563eb;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 2px 8px rgba(37, 99, 235, 0.5);
+}
+
+.dark .user-location-marker__dot {
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.9), 0 2px 8px rgba(37, 99, 235, 0.6);
 }
 
 .leaflet-popup.pet-map-popup .leaflet-popup-content-wrapper {
