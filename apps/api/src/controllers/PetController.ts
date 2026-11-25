@@ -50,7 +50,7 @@ export class PetController {
     try {
       const id = String(req.params.id);
       const petData: UpdatePetDTO = req.body;
-      const pet = await this.petService.update(id, petData);
+      const pet = await this.petService.update(id, petData, req.user.id);
       res.status(StatusCodes.OK).json(pet);
     } catch (error) {
       next(error);
@@ -62,7 +62,7 @@ export class PetController {
     try {
       const id = String(req.params.id);
       const petData: Partial<UpdatePetDTO> = req.body;
-      const pet = await this.petService.update(id, petData);
+      const pet = await this.petService.update(id, petData, req.user.id);
       res.status(StatusCodes.OK).json(pet);
     } catch (error) {
       next(error);
@@ -73,7 +73,7 @@ export class PetController {
   delete = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const id = String(req.params.id);
-      await this.petService.delete(id);
+      await this.petService.delete(id, req.user.id);
       res.status(StatusCodes.NO_CONTENT).send();
     } catch (error) {
       next(error);

@@ -50,3 +50,25 @@ describe('PostService ownership', () => {
     await expect(service.update('missing', {} as any, 'owner')).rejects.toMatchObject({ statusCode: 404 });
   });
 });
+
+describe('PostService notificação', () => {
+  it('não notifica a vizinhança ao marcar como resolvido', async () => {
+    const { service, repository, notificationService } = buildDeps();
+    repository.findById.mockResolvedValue({ id: 'p1', userId: 'owner' });
+    repository.update.mockResolvedValue({ id: 'p1', userId: 'owner', status: 'RESOLVED' });
+
+    await service.update('p1', { status: 'RESOLVED' } as any, 'owner');
+
+    expect(notificationService.notifyNearbyUsers).not.toHaveBeenCalled();
+  });
+
+  it('notifica quando o anúncio segue ativo após a edição', async () => {
+    const { service, repository, notificationService } = buildDeps();
+    repository.findById.mockResolvedValue({ id: 'p1', userId: 'owner' });
+    repository.update.mockResolvedValue({ id: 'p1', userId: 'owner', status: 'ACTIVE' });
+
+    await service.update('p1', { content: 'novo texto do anúncio' } as any, 'owner');
+
+    expect(notificationService.notifyNearbyUsers).toHaveBeenCalledWith('p1');
+  });
+});

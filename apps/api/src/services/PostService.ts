@@ -55,7 +55,11 @@ export class PostService {
     }
 
     const updated = await this.repository.update(id, data);
-    void this.notificationService.notifyNearbyUsers(updated.id);
+    // Só notifica a vizinhança enquanto o anúncio segue ativo. Marcar como
+    // resolvido/cancelado não deve disparar alerta de "pet perdido na região".
+    if (updated.status === 'ACTIVE') {
+      void this.notificationService.notifyNearbyUsers(updated.id);
+    }
     return updated;
   }
 
