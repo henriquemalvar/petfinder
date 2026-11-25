@@ -64,3 +64,58 @@ jobs:
         run: npm test --workspace=@petfinder/web
       - name: Build
         run: npm run build --workspace=@petfinder/web
+
+  e2e:
+    name: E2E (Cypress)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: petfinder
+          POSTGRES_PASSWORD: petfinder
+          POSTGRES_DB: petfinder
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://petfinder:petfinder@localhost:5432/petfinder
+      DIRECT_URL: postgresql://petfinder:petfinder@localhost:5432/petfinder
+      JWT_SECRET: e2e-secret
+      NEXT_PUBLIC_API_URL: http://localhost:3333
+      # A suíte roda tudo de um mesmo IP; o limite de 20/15min do /auth
+      # estouraria com os logins de UI somados aos de cy.request.
+      AUTH_RATE_LIMIT_MAX: 200
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Migrations + seed
+        working-directory: apps/api
+        run: |
+          npx prisma migrate deploy
+          npm run seed
+      - name: Build
+        run: |
+          npm run build --workspace=@petfinder/api
+          npm run build --workspace=@petfinder/web
+      - name: Sobe API e web
+        run: |
+          npm start --workspace=@petfinder/api &
+          npm start --workspace=@petfinder/web &
+          npx wait-on -t 90000 http://localhost:3333/api/posts http://localhost:3000
+      - name: Cypress
+        run: npm run cy:run --workspace=@petfinder/web
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: apps/web/cypress/screenshots
+          if-no-files-found: ignore
