@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../../server';
+import { app } from '../../httpApp';
 
 export interface TestUser {
   id: string;

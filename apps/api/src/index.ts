@@ -1,4 +1,4 @@
-import { app } from './server';
+import { app } from './httpApp';
 import { validateEnv } from './config/env';
 
 validateEnv();
