@@ -77,10 +77,10 @@ export function ProfileClient({ user, posts }: ProfileClientProps) {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 md:px-6">
+    <div className="page-container py-10">
       <h1 className="mb-8 text-2xl font-bold">Meu perfil</h1>
 
-      <div className="grid gap-10 md:grid-cols-[280px_1fr]">
+      <div className="grid gap-10 lg:grid-cols-[280px_1fr]">
         {/* Sidebar: avatar + form */}
         <div className="space-y-6">
           <div className="flex flex-col items-center gap-3">
@@ -195,7 +195,7 @@ export function ProfileClient({ user, posts }: ProfileClientProps) {
               </a>
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {posts.map((post) => (
                 <MyAnnouncementCard key={post.id} post={post} />
               ))}

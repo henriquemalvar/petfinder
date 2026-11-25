@@ -26,6 +26,66 @@ const typeOptions: { value: PostType; label: string; icon: LucideIcon }[] = [
   { value: "ADOPTION", label: "Pet para adoção", icon: Heart },
 ];
 
+const PET_STEP = 1;
+const LOCATION_STEP = 3;
+
+const fieldLabels: Record<string, string> = {
+  "body.type": "Tipo de anúncio",
+  "body.title": "Título",
+  "body.content": "Conteúdo do anúncio",
+  "body.whatsapp": "WhatsApp",
+  "body.instagram": "Instagram",
+  "body.pet.name": "Nome do pet",
+  "body.pet.type": "Espécie",
+  "body.pet.breed": "Raça",
+  "body.pet.age": "Idade",
+  "body.pet.gender": "Sexo",
+  "body.pet.size": "Porte",
+  "body.pet.description": "Descrição",
+  "body.pet.image": "Foto",
+  "body.pet.location": "Localização",
+  "body.pet.latitude": "Latitude",
+  "body.pet.longitude": "Longitude",
+};
+
+const requiredPetFields = [
+  { name: "name", minLength: 2, step: PET_STEP },
+  { name: "type", minLength: 2, step: PET_STEP },
+  { name: "breed", minLength: 2, step: PET_STEP },
+  { name: "age", minLength: 1, step: PET_STEP },
+  { name: "description", minLength: 10, step: PET_STEP },
+  { name: "location", minLength: 2, step: LOCATION_STEP },
+] as const;
+
+function describeRequirement(field: (typeof requiredPetFields)[number]) {
+  const label = fieldLabels[`body.pet.${field.name}`];
+  return field.minLength > 1
+    ? `${label} (mínimo ${field.minLength} caracteres)`
+    : label;
+}
+
+function pendingFieldsForStep(step: number, pet: AnnouncementPayload["pet"]) {
+  return requiredPetFields
+    .filter((field) => field.step === step)
+    .filter((field) => (pet[field.name] ?? "").trim().length < field.minLength)
+    .map(describeRequirement);
+}
+
+function labelForServerField(path: string) {
+  return fieldLabels[path] ?? path.split(".").pop() ?? path;
+}
+
+function messageForFailedSubmit(body: {
+  error?: string;
+  errors?: { field: string; message: string }[];
+}) {
+  if (body.errors?.length) {
+    const fields = body.errors.map((issue) => labelForServerField(issue.field));
+    return `Revise: ${[...new Set(fields)].join(", ")}`;
+  }
+  return body.error ?? "Erro ao publicar";
+}
+
 function PostWizardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -58,6 +118,16 @@ function PostWizardContent() {
     setForm((prev) => ({ ...prev, pet: { ...prev.pet, [field]: value } }));
   }
 
+  const pendingFields = pendingFieldsForStep(step, form.pet);
+
+  function goToNextStep() {
+    if (pendingFields.length > 0) {
+      toast.error(`Preencha: ${pendingFields.join(", ")}`);
+      return;
+    }
+    setStep((s) => s + 1);
+  }
+
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -85,7 +155,7 @@ function PostWizardContent() {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || "Erro ao publicar");
+        throw new Error(messageForFailedSubmit(body));
       }
       setDone(true);
       toast.success("Anúncio publicado!");
@@ -150,22 +220,22 @@ function PostWizardContent() {
       {step === 1 && (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="name">Nome do pet</Label>
+            <Label htmlFor="name">Nome do pet <span className="text-destructive">*</span></Label>
             <Input id="name" value={form.pet.name} onChange={(e) => updatePet("name", e.target.value)} className="mt-1 rounded-xl" />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="type">Espécie</Label>
+              <Label htmlFor="type">Espécie <span className="text-destructive">*</span></Label>
               <Input id="type" value={form.pet.type} onChange={(e) => updatePet("type", e.target.value)} className="mt-1 rounded-xl" />
             </div>
             <div>
-              <Label htmlFor="breed">Raça</Label>
+              <Label htmlFor="breed">Raça <span className="text-destructive">*</span></Label>
               <Input id="breed" value={form.pet.breed} onChange={(e) => updatePet("breed", e.target.value)} className="mt-1 rounded-xl" />
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <Label htmlFor="age">Idade</Label>
+              <Label htmlFor="age">Idade <span className="text-destructive">*</span></Label>
               <Input id="age" value={form.pet.age} onChange={(e) => updatePet("age", e.target.value)} className="mt-1 rounded-xl" placeholder="Ex: 2 anos" />
             </div>
             <div>
@@ -195,7 +265,7 @@ function PostWizardContent() {
             </select>
           </div>
           <div>
-            <Label htmlFor="description">Descrição</Label>
+            <Label htmlFor="description">Descrição <span className="text-destructive">*</span></Label>
             <Textarea
               id="description"
               value={form.pet.description}
@@ -239,7 +309,7 @@ function PostWizardContent() {
       {step === 3 && (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="location">Localização / Bairro</Label>
+            <Label htmlFor="location">Localização / Bairro <span className="text-destructive">*</span></Label>
             <Input
               id="location"
               value={form.pet.location}
@@ -308,7 +378,7 @@ function PostWizardContent() {
           Voltar
         </Button>
         {step < STEPS.length - 1 ? (
-          <Button className="rounded-xl" onClick={() => setStep((s) => s + 1)}>
+          <Button className="rounded-xl" onClick={goToNextStep}>
             Próximo passo
           </Button>
         ) : (

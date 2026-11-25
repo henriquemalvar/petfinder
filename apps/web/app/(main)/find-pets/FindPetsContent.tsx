@@ -50,7 +50,7 @@ export default function FindPetsPage() {
   }, [activeFilter, search]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:px-6">
+    <div className="page-container py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Pets disponíveis perto de você</h1>
         <p className="mt-2 text-muted-foreground">Explore alertas de perdidos, achados e adoções.</p>
