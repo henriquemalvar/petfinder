@@ -10,6 +10,8 @@ jobs:
   api:
     name: API (lint + typecheck + testes)
     runs-on: ubuntu-latest
+    env:
+      CYPRESS_INSTALL_BINARY: 0
     services:
       postgres:
         image: postgres:16-alpine
@@ -28,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - name: Prisma generate
@@ -37,6 +39,8 @@ jobs:
         run: npm run lint --workspace=@petfinder/api
       - name: Typecheck (src + prisma/seed)
         run: npm run typecheck --workspace=@petfinder/api
+      - name: Typecheck dos testes
+        run: npm run typecheck:test --workspace=@petfinder/api
       - name: Testes unitários
         working-directory: apps/api
         run: npm test
@@ -47,11 +51,13 @@ jobs:
   web:
     name: Web (lint + typecheck + testes + build)
     runs-on: ubuntu-latest
+    env:
+      CYPRESS_INSTALL_BINARY: 0
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - name: Prisma generate (dep do build)
@@ -94,8 +100,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
       - name: Migrations + seed
         working-directory: apps/api
@@ -108,14 +118,17 @@ jobs:
           npm run build --workspace=@petfinder/web
       - name: Sobe API e web
         run: |
-          npm start --workspace=@petfinder/api &
-          npm start --workspace=@petfinder/web &
-          npx wait-on -t 90000 http://localhost:3333/api/posts http://localhost:3000
+          npm start --workspace=@petfinder/api > api.log 2>&1 &
+          npm start --workspace=@petfinder/web > web.log 2>&1 &
+          npx --yes wait-on@9.5.1 -t 90000 http://localhost:3333/api/posts http://localhost:3000
       - name: Cypress
         run: npm run cy:run --workspace=@petfinder/web
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: cypress-screenshots
-          path: apps/web/cypress/screenshots
+          path: |
+            apps/web/cypress/screenshots
+            api.log
+            web.log
           if-no-files-found: ignore
