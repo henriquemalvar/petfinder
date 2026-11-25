@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { CircleCheckBig, Heart, PawPrint, Search, type LucideIcon } from "lucide-react";
 import { toast } from "sonner";
+import { clientUpload } from "@/lib/client-api";
+import { UploadTooLarge } from "@/lib/image-upload";
 
 const STEPS = [
   "Passo 1: Tipo de anúncio",
@@ -133,15 +135,15 @@ function PostWizardContent() {
     if (!file) return;
     setImagePreview(URL.createObjectURL(file));
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/uploads", { method: "POST", body: formData });
-      if (!res.ok) throw new Error();
-      const { url } = await res.json();
+      const { url } = await clientUpload(file);
       updatePet("image", url);
       toast.success("Foto enviada!");
-    } catch {
-      toast.error("Erro no upload. Continue sem foto ou tente novamente.");
+    } catch (error) {
+      toast.error(
+        error instanceof UploadTooLarge
+          ? error.message
+          : "Erro no upload. Continue sem foto ou tente novamente.",
+      );
     }
   }
 

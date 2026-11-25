@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { clientUpload } from "@/lib/client-api";
+import { UploadTooLarge } from "@/lib/image-upload";
 import type { ApiPost, PetGender, PetSize, PostType } from "@/lib/types";
 import {
   Dialog,
@@ -61,15 +63,11 @@ export function EditAnnouncementDialog({
     if (!file) return;
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/uploads", { method: "POST", body: formData });
-      if (!res.ok) throw new Error();
-      const { url } = await res.json();
+      const { url } = await clientUpload(file);
       setPetField("image", url);
       toast.success("Foto atualizada!");
-    } catch {
-      toast.error("Erro ao enviar foto");
+    } catch (error) {
+      toast.error(error instanceof UploadTooLarge ? error.message : "Erro ao enviar foto");
     } finally {
       setUploading(false);
     }

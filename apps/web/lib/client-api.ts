@@ -1,5 +1,6 @@
 "use client";
 
+import { MAX_UPLOAD_BYTES, UploadTooLarge, shrinkImage } from "@/lib/image-upload";
 import type { AuthResponse } from "@/lib/types";
 
 export async function clientLogin(email: string, password: string) {
@@ -46,8 +47,12 @@ export async function clientLogout() {
 }
 
 export async function clientUpload(file: File) {
+  const prepared = await shrinkImage(file);
+  if (prepared.size > MAX_UPLOAD_BYTES) {
+    throw new UploadTooLarge();
+  }
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", prepared);
   const res = await fetch("/api/uploads", {
     method: "POST",
     body: formData,

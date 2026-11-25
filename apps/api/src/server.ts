@@ -12,6 +12,10 @@ dotenv.config();
 
 const app = express();
 
+if (process.env.VERCEL) {
+  app.set('trust proxy', 1);
+}
+
 // Middlewares
 app.use(helmet());
 app.use(cors({
