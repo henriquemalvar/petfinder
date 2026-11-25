@@ -2,7 +2,9 @@ import express from 'express';
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 
-async function buildApp(max?: string) {
+const DEFAULT_AUTH_MAX = 20;
+
+async function buildApp(max?: string): Promise<express.Express> {
   if (max === undefined) {
     delete process.env.AUTH_RATE_LIMIT_MAX;
   } else {
@@ -18,27 +20,23 @@ async function buildApp(max?: string) {
   return app;
 }
 
+async function expectBlockedAfter(app: express.Express, allowed: number): Promise<void> {
+  for (let i = 0; i < allowed; i += 1) {
+    expect((await request(app).get('/auth')).status).toBe(200);
+  }
+  expect((await request(app).get('/auth')).status).toBe(429);
+}
+
 describe('authLimiter', () => {
   it('respeita o teto definido em AUTH_RATE_LIMIT_MAX', async () => {
-    const app = await buildApp('2');
-
-    expect((await request(app).get('/auth')).status).toBe(200);
-    expect((await request(app).get('/auth')).status).toBe(200);
-    expect((await request(app).get('/auth')).status).toBe(429);
+    await expectBlockedAfter(await buildApp('2'), 2);
   });
 
-  it('usa 20 como padrão quando a variável não está definida', async () => {
-    const app = await buildApp(undefined);
-
-    for (let i = 0; i < 20; i += 1) {
-      expect((await request(app).get('/auth')).status).toBe(200);
-    }
-    expect((await request(app).get('/auth')).status).toBe(429);
+  it('usa o padrão quando a variável não está definida', async () => {
+    await expectBlockedAfter(await buildApp(undefined), DEFAULT_AUTH_MAX);
   });
 
-  it('ignora valor não numérico e cai no padrão', async () => {
-    const app = await buildApp('muitos');
-
-    expect((await request(app).get('/auth')).status).toBe(200);
+  it.each(['muitos', '', '0', '-5'])('cai no padrão quando o valor é %j', async (value) => {
+    await expectBlockedAfter(await buildApp(value), DEFAULT_AUTH_MAX);
   });
 });
