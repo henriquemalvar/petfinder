@@ -1,21 +1,24 @@
 import { Post } from '@prisma/client';
-import { prisma } from '../config/prisma';
 import { StatusCodes } from 'http-status-codes';
 import { AppError } from '../errors/AppError';
 import { PostRepository } from '../repositories/PostRepository';
+import { UserRepository } from '../repositories/UserRepository';
 import { CreatePostDTO, Paginated, Pagination, PostFilters, UpdatePostDTO } from '../types';
 import { NotificationService } from './NotificationService';
 
 export class PostService {
   private repository: PostRepository;
   private notificationService: NotificationService;
+  private userRepository: UserRepository;
 
   constructor(
     repository: PostRepository = new PostRepository(),
-    notificationService: NotificationService = new NotificationService()
+    notificationService: NotificationService = new NotificationService(),
+    userRepository: UserRepository = new UserRepository()
   ) {
     this.repository = repository;
     this.notificationService = notificationService;
+    this.userRepository = userRepository;
   }
 
   async findAll(pagination?: Pagination): Promise<Paginated<Post>> {
@@ -75,10 +78,7 @@ export class PostService {
   }
 
   async findByUserId(userId: string, pagination?: Pagination): Promise<Paginated<Post>> {
-    // Verifica se o usuário existe
-    const user = await prisma.user.findUnique({
-      where: { id: userId }
-    });
+    const user = await this.userRepository.findById(userId);
 
     if (!user) {
       throw new AppError('Usuário não encontrado', StatusCodes.NOT_FOUND);

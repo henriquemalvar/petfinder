@@ -1,10 +1,27 @@
-import { PostType } from '@prisma/client';
-import { prisma } from '../config/prisma';
+import { Notification, PostType } from '@prisma/client';
+import { NotificationRepository } from '../repositories/NotificationRepository';
+import { PostRepository } from '../repositories/PostRepository';
+import { UserRepository } from '../repositories/UserRepository';
 import { boundingBox, getDistanceKm } from '../utils/geo';
 
 const RADIUS_KM = 10;
+const FEED_SIZE = 30;
 
 export class NotificationService {
+  private repository: NotificationRepository;
+  private postRepository: PostRepository;
+  private userRepository: UserRepository;
+
+  constructor(
+    repository: NotificationRepository = new NotificationRepository(),
+    postRepository: PostRepository = new PostRepository(),
+    userRepository: UserRepository = new UserRepository()
+  ) {
+    this.repository = repository;
+    this.postRepository = postRepository;
+    this.userRepository = userRepository;
+  }
+
   private buildMessage(type: PostType, petName: string) {
     switch (type) {
       case 'LOST':
@@ -31,10 +48,7 @@ export class NotificationService {
    */
   async notifyNearbyUsers(postId: string): Promise<void> {
     try {
-      const post = await prisma.post.findUnique({
-        where: { id: postId },
-        include: { pet: true },
-      });
+      const post = await this.postRepository.findById(postId);
 
       if (!post || post.pet.latitude == null || post.pet.longitude == null) {
         return;
@@ -46,14 +60,7 @@ export class NotificationService {
 
       // Pré-filtro pela caixa envolvente direto no banco: reduz o conjunto de
       // candidatos antes do Haversine, em vez de trazer todos os usuários.
-      const users = await prisma.user.findMany({
-        where: {
-          id: { not: post.userId },
-          latitude: { gte: box.minLat, lte: box.maxLat },
-          longitude: { gte: box.minLon, lte: box.maxLon },
-        },
-        select: { id: true, latitude: true, longitude: true },
-      });
+      const users = await this.userRepository.findWithinBoundingBox(box, post.userId);
 
       const nearbyUserIds = users
         .filter((u) => getDistanceKm(petLat, petLon, u.latitude!, u.longitude!) <= RADIUS_KM)
@@ -63,15 +70,28 @@ export class NotificationService {
 
       const message = this.buildMessage(post.type, post.pet.name);
 
-      await prisma.notification.createMany({
-        data: nearbyUserIds.map((userId) => ({
+      await this.repository.createMany(
+        nearbyUserIds.map((userId) => ({
           userId,
           postId: post.id,
           message,
         })),
-      });
+      );
     } catch (error) {
       console.error(`[NotificationService] Falha ao notificar sobre o post ${postId}:`, error);
     }
+  }
+
+  async listForUser(userId: string): Promise<{ notifications: Notification[]; unreadCount: number }> {
+    const notifications = await this.repository.findByUserId(userId, FEED_SIZE);
+
+    return {
+      notifications,
+      unreadCount: notifications.filter((n) => !n.read).length,
+    };
+  }
+
+  async markAsRead(id: string, userId: string): Promise<void> {
+    await this.repository.markAsRead(id, userId);
   }
 }

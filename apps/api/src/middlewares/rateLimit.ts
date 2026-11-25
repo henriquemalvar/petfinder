@@ -1,12 +1,15 @@
 import rateLimit from 'express-rate-limit';
 
-/**
- * Limite mais rígido para rotas de autenticação, mitigando brute force
- * de senha e spam de cadastro.
- */
+const DEFAULT_AUTH_MAX = 20;
+
+function resolveAuthMax(): number {
+  const raw = Number(process.env.AUTH_RATE_LIMIT_MAX);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_AUTH_MAX;
+}
+
 export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 20, // 20 tentativas por IP na janela
+  windowMs: 15 * 60 * 1000,
+  max: resolveAuthMax(),
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Muitas tentativas. Tente novamente mais tarde.' },

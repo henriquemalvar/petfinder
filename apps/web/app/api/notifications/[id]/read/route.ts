@@ -1,21 +1,10 @@
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-import { API_URL } from "@/lib/utils";
+import { NextResponse } from "next/server";
+import { proxy } from "@/lib/server-proxy";
 
 export async function PATCH(
-  _req: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> },
-) {
+): Promise<NextResponse> {
   const { id } = await params;
-  const token = (await cookies()).get("token")?.value;
-  if (!token) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
-  }
-  const res = await fetch(`${API_URL}/api/notifications/${id}/read`, {
-    method: "PATCH",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (res.status === 204) return new NextResponse(null, { status: 204 });
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+  return proxy(`/api/notifications/${id}/read`, { method: "PATCH", requireAuth: true });
 }
