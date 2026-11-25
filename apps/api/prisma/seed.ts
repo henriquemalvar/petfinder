@@ -1,6 +1,8 @@
 import { PetGender, PetSize, PostStatus, PostType } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { randomBytes } from 'node:crypto';
 import { prisma } from '../src/config/prisma';
+import { requireEnv } from '../src/config/env';
 
 const CITY_COORDS: Record<string, [number, number]> = {
   'São Paulo': [-23.5505, -46.6333],
@@ -21,66 +23,64 @@ function coordsFor(location: string, index: number) {
   };
 }
 
-async function main() {
-  // Limpar o banco de dados
+type SeedUser = {
+  name: string;
+  email: string;
+  password: string;
+  whatsapp?: string;
+  instagram: string;
+  contactPreference: 'WHATSAPP' | 'INSTAGRAM';
+};
+
+const LOCAL_USERS: SeedUser[] = [
+  { name: 'João Silva', email: 'joao@email.com', password: '123456', whatsapp: '11999999999', instagram: '@joaosilva', contactPreference: 'WHATSAPP' },
+  { name: 'Maria Santos', email: 'maria@email.com', password: '123456', whatsapp: '11988888888', instagram: '@mariasantos', contactPreference: 'INSTAGRAM' },
+  { name: 'Pedro Oliveira', email: 'pedro@email.com', password: '123456', whatsapp: '11977777777', instagram: '@pedrooliveira', contactPreference: 'WHATSAPP' },
+  { name: 'Ana Costa', email: 'ana@email.com', password: '123456', whatsapp: '11966666666', instagram: '@anacosta', contactPreference: 'INSTAGRAM' },
+  { name: 'Lucas Mendes', email: 'lucas@email.com', password: '123456', whatsapp: '11955555555', instagram: '@lucasmendes', contactPreference: 'WHATSAPP' },
+];
+
+const isProductionSeed = process.env.SEED_MODE === 'production';
+
+function productionUsers(): SeedUser[] {
+  const demoEmail = requireEnv('DEMO_USER_EMAIL');
+  const demoPassword = requireEnv('DEMO_USER_PASSWORD');
+  return LOCAL_USERS.map((user, index) => {
+    const isDemo = index === 0;
+    const handle = user.email.split('@')[0];
+    return {
+      name: isDemo ? 'Visitante Demo' : user.name,
+      email: isDemo ? demoEmail : `${handle}@petfinder.example`,
+      password: isDemo ? demoPassword : randomBytes(24).toString('base64url'),
+      instagram: `@petfinder.demo.${handle}`,
+      contactPreference: 'INSTAGRAM',
+    };
+  });
+}
+
+async function prepareDatabase(): Promise<void> {
+  if (isProductionSeed) {
+    const existingUsers = await prisma.user.count();
+    if (existingUsers > 0) {
+      throw new Error(`Seed de produção recusado: o banco já tem ${existingUsers} usuários.`);
+    }
+    return;
+  }
   await prisma.notification.deleteMany();
   await prisma.post.deleteMany();
   await prisma.pet.deleteMany();
   await prisma.user.deleteMany();
+}
 
-  // Criar usuários
-  const users = await Promise.all([
-    prisma.user.create({
-      data: {
-        name: 'João Silva',
-        email: 'joao@email.com',
-        password: await bcrypt.hash('123456', 10),
-        whatsapp: '11999999999',
-        instagram: '@joaosilva',
-        contactPreference: 'WHATSAPP',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        name: 'Maria Santos',
-        email: 'maria@email.com',
-        password: await bcrypt.hash('123456', 10),
-        whatsapp: '11988888888',
-        instagram: '@mariasantos',
-        contactPreference: 'INSTAGRAM',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        name: 'Pedro Oliveira',
-        email: 'pedro@email.com',
-        password: await bcrypt.hash('123456', 10),
-        whatsapp: '11977777777',
-        instagram: '@pedrooliveira',
-        contactPreference: 'WHATSAPP',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        name: 'Ana Costa',
-        email: 'ana@email.com',
-        password: await bcrypt.hash('123456', 10),
-        whatsapp: '11966666666',
-        instagram: '@anacosta',
-        contactPreference: 'INSTAGRAM',
-      },
-    }),
-    prisma.user.create({
-      data: {
-        name: 'Lucas Mendes',
-        email: 'lucas@email.com',
-        password: await bcrypt.hash('123456', 10),
-        whatsapp: '11955555555',
-        instagram: '@lucasmendes',
-        contactPreference: 'WHATSAPP',
-      },
-    }),
-  ]);
+async function main() {
+  await prepareDatabase();
+
+  const seedUsers = isProductionSeed ? productionUsers() : LOCAL_USERS;
+  const users = await Promise.all(
+    seedUsers.map(async ({ password, ...user }) =>
+      prisma.user.create({ data: { ...user, password: await bcrypt.hash(password, 10) } }),
+    ),
+  );
 
   // Dados dos pets
   const petsData = [

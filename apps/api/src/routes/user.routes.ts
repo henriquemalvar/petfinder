@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/UserController';
 import { validate } from '../middlewares/validate';
+import { lockDemoAccount, lockDemoCredentials } from '../middlewares/demoAccount';
 import { changePasswordSchema, createUserSchema, updateUserSchema } from '../schemas/user.schema';
 
 const router = Router();
@@ -39,7 +40,7 @@ const userController = new UserController();
  *       401:
  *         description: Senha atual incorreta
  */
-router.post('/change-password', validate(changePasswordSchema), userController.changePassword);
+router.post('/change-password', lockDemoAccount, validate(changePasswordSchema), userController.changePassword);
 
 /**
  * @swagger
@@ -204,7 +205,7 @@ router.get('/:id', userController.findById);
  *       404:
  *         description: Usuário não encontrado
  */
-router.put('/:id', validate(updateUserSchema), userController.update);
+router.put('/:id', lockDemoCredentials, validate(updateUserSchema), userController.update);
 
 /**
  * @swagger
@@ -229,6 +230,6 @@ router.put('/:id', validate(updateUserSchema), userController.update);
  *       404:
  *         description: Usuário não encontrado
  */
-router.delete('/:id', userController.delete);
+router.delete('/:id', lockDemoAccount, userController.delete);
 
 export default router; 
