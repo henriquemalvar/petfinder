@@ -58,6 +58,11 @@ function productionUsers(): SeedUser[] {
   });
 }
 
+function petOwnerIndex(petIndex: number, userCount: number): number {
+  if (!isProductionSeed) return Math.floor(petIndex / 4);
+  return 1 + (petIndex % (userCount - 1));
+}
+
 async function prepareDatabase(): Promise<void> {
   if (isProductionSeed) {
     const existingUsers = await prisma.user.count();
@@ -344,7 +349,7 @@ async function main() {
           ...petData,
           latitude,
           longitude,
-          userId: users[Math.floor(index / 4)].id,
+          userId: users[petOwnerIndex(index, users.length)].id,
         },
       });
     })
