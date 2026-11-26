@@ -13,9 +13,9 @@ export const POST_TYPE_LABEL: Record<PostType, string> = {
 };
 
 export const POST_TYPE_COLORS: Record<PostType, string> = {
-  LOST: "bg-warning/20 text-warning border-warning/30",
-  FOUND: "bg-info/20 text-info border-info/30",
-  ADOPTION: "bg-tertiary/20 text-tertiary border-tertiary/30",
+  LOST: "bg-warning text-on-warning border-transparent",
+  FOUND: "bg-info text-on-info border-transparent",
+  ADOPTION: "bg-tertiary text-on-tertiary border-transparent",
 };
 
 export function formatDate(date: string) {

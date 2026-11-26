@@ -13,7 +13,7 @@ export function StatusChip({ type, className, pulse }: StatusChipProps) {
       className={cn(
         "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold",
         POST_TYPE_COLORS[type],
-        pulse && type === "LOST" && "map-pin-pulse",
+        pulse && type === "LOST" && "status-chip-pulse",
         className,
       )}
     >

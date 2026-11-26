@@ -28,6 +28,9 @@
   --warning: #f59e0b;
   --success: #059669;
   --info: #00ccf9;
+  --on-tertiary: #ffffff;
+  --on-warning: #1a1c1e;
+  --on-info: #1a1c1e;
   --font-display: var(--font-quicksand, "Quicksand", sans-serif);
   --font-body: var(--font-quicksand, "Quicksand", sans-serif);
 }
@@ -61,6 +64,9 @@
   --warning: #ebc23e;
   --success: #66d9cc;
   --info: #00c2de;
+  --on-tertiary: #1a1c1e;
+  --on-warning: #1a1c1e;
+  --on-info: #1a1c1e;
   --font-display: var(--font-jakarta, "Plus Jakarta Sans", sans-serif);
   --font-body: var(--font-jakarta, "Plus Jakarta Sans", sans-serif);
 }

@@ -33,6 +33,9 @@
   --color-warning: var(--warning);
   --color-success: var(--success);
   --color-info: var(--info);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-on-warning: var(--on-warning);
+  --color-on-info: var(--on-info);
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
   --radius-sm: calc(var(--radius) - 4px);
@@ -82,8 +85,8 @@
   .pet-card-image-gradient {
     background: linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, transparent 40%);
   }
-  .map-pin-pulse {
-    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  .status-chip-pulse {
+    animation: status-chip-halo 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   .map-hero-vignette {
     position: absolute;
@@ -356,6 +359,15 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
   border-radius: 12px !important;
   overflow: hidden;
+}
+
+@keyframes status-chip-halo {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--warning) 70%, transparent); }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--warning) 0%, transparent); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-chip-pulse { animation: none; }
 }
 
 @keyframes pulse-ring {
