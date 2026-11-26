@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
+import "@maplibre/maplibre-gl-leaflet";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import type { ApiPost } from "@/lib/types";
@@ -12,13 +13,14 @@ import {
   DEFAULT_MAP_CENTER,
   getHeroCardOcclusionWidth,
   computeHeroTourTooltipPosition,
-  MAP_TILES,
+  MAP_STYLES,
   PIN_CONFIG,
 } from "@/lib/map-config";
 import { isDemoPost } from "@/lib/mock-posts";
 import { HeroMapTour } from "./HeroMapTour";
 import { HeroTourOverlay } from "./HeroTourOverlay";
 import "leaflet/dist/leaflet.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 
 function createPinIcon(type: ApiPost["type"], selected: boolean) {
   return L.divIcon({
@@ -30,17 +32,20 @@ function createPinIcon(type: ApiPost["type"], selected: boolean) {
   });
 }
 
-function ThemeTileLayer() {
+function ThemeBaseLayer() {
+  const map = useMap();
   const { resolvedTheme } = useTheme();
-  const tiles = resolvedTheme === "dark" ? MAP_TILES.dark : MAP_TILES.light;
+  const style = resolvedTheme === "dark" ? MAP_STYLES.dark : MAP_STYLES.light;
 
-  return (
-    <TileLayer
-      key={tiles.url}
-      attribution={tiles.attribution}
-      url={tiles.url}
-    />
-  );
+  useEffect(() => {
+    const layer = L.maplibreGL({ style });
+    layer.addTo(map);
+    return () => {
+      map.removeLayer(layer);
+    };
+  }, [map, style]);
+
+  return null;
 }
 
 function FitBounds({
@@ -265,7 +270,7 @@ export default function MapClient({
         dragging={interactive}
         zoomControl={interactive}
       >
-        <ThemeTileLayer />
+        <ThemeBaseLayer />
         {withCoords.length > 0 && <FitBounds posts={withCoords} variant={variant} />}
         <UserLocation location={userLocation} />
         {heroTour && (
