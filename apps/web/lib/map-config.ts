@@ -20,7 +20,7 @@ export const PIN_CONFIG: Record<
 > = {
   LOST: { color: "#f59e0b", glow: "rgba(245,158,11,0.35)", label: "Perdido" },
   FOUND: { color: "#06b6d4", glow: "rgba(6,182,212,0.35)", label: "Encontrado" },
-  ADOPTION: { color: "#0066ff", glow: "rgba(0,102,255,0.35)", label: "Adoção" },
+  ADOPTION: { color: "#b10055", glow: "rgba(177,0,85,0.35)", label: "Adoção" },
 };
 
 export const DEFAULT_MAP_CENTER: [number, number] = [-19.9191, -43.9386];
