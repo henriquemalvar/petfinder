@@ -329,7 +329,7 @@
         }
       }
     },
-    "/api/upload": {
+    "/api/uploads": {
       "post": {
         "tags": [
           "Upload"
