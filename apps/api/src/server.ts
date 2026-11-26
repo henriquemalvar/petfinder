@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { swaggerDocs, swaggerSetup } from './config/swagger';
+import { apiDocsRouter } from './config/swagger';
 import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler';
 import { validateEnv } from './config/env';
@@ -30,7 +30,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Documentação Swagger
-app.use('/api-docs', swaggerSetup, swaggerDocs);
+app.use('/api-docs', apiDocsRouter);
 
 // Rota de health check
 app.get('/health', (req: Request, res: Response) => {

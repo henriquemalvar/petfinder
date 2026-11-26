@@ -8,7 +8,7 @@ const uploadController = new UploadController();
 
 /**
  * @swagger
- * /api/upload:
+ * /api/uploads:
  *   post:
  *     tags:
  *       - Upload

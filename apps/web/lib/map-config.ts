@@ -23,7 +23,7 @@ export const PIN_CONFIG: Record<
   ADOPTION: { color: "#0066ff", glow: "rgba(0,102,255,0.35)", label: "Adoção" },
 };
 
-export const DEFAULT_MAP_CENTER: [number, number] = [-23.5505, -46.6333];
+export const DEFAULT_MAP_CENTER: [number, number] = [-19.9191, -43.9386];
 
 export function getHeroCardOcclusionWidth(mapWidth: number): number {
   if (mapWidth >= 1280) return Math.round(Math.min(mapWidth * 0.54, 780));
