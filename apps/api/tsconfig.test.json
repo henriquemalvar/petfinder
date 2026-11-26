@@ -4,6 +4,6 @@
     "module": "esnext",
     "moduleResolution": "bundler"
   },
-  "include": ["src/**/*", "prisma/**/*.ts", "vitest.config.ts", "vitest.integration.config.ts"],
+  "include": ["src/**/*", "prisma/**/*.ts", "vitest.config.ts", "vitest.integration.config.ts", "scripts/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

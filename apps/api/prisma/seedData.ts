@@ -1,0 +1,321 @@
+import { PetGender, PetSize, PostType } from '@prisma/client';
+
+export const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
+  Savassi: [-19.9386, -43.9351],
+  'Funcionários': [-19.933, -43.929],
+  Lourdes: [-19.9335, -43.9445],
+  Centro: [-19.9191, -43.9386],
+  'Santa Tereza': [-19.9145, -43.9155],
+  Pampulha: [-19.852, -43.97],
+  Buritis: [-19.976, -43.969],
+  Sion: [-19.954, -43.932],
+  Castelo: [-19.8865, -44.001],
+  'Cidade Nova': [-19.888, -43.931],
+};
+
+export function coordsFor(neighborhood: string, index: number): { latitude: number; longitude: number } {
+  const base = NEIGHBORHOOD_COORDS[neighborhood] ?? NEIGHBORHOOD_COORDS.Centro;
+  const angle = ((index % 4) / 4) * Math.PI * 2;
+  const radius = 0.002 + (index % 3) * 0.0015;
+  return {
+    latitude: base[0] + Math.sin(angle) * radius,
+    longitude: base[1] + Math.cos(angle) * radius,
+  };
+}
+
+function unsplash(photoId: string): string {
+  return `https://images.unsplash.com/photo-${photoId}?w=800&h=600&fit=crop`;
+}
+
+const SPECIES_LABEL: Record<string, string> = { DOG: 'cachorro', CAT: 'gato' };
+
+type PetForCopy = { name: string; type: string; breed: string; description: string; location: string };
+
+export function postTypeFor(index: number): PostType {
+  const types = [PostType.ADOPTION, PostType.LOST, PostType.FOUND];
+  return types[index % types.length];
+}
+
+export function postCopy(pet: PetForCopy, postType: PostType): { title: string; content: string } {
+  const species = SPECIES_LABEL[pet.type] ?? 'pet';
+  switch (postType) {
+    case PostType.ADOPTION:
+      return {
+        title: `${pet.name} para adoção`,
+        content: `${pet.description}. Procura um lar amoroso e responsável.`,
+      };
+    case PostType.LOST:
+      return {
+        title: `${pet.name} desapareceu`,
+        content: `${pet.name} desapareceu na região de ${pet.location}. ${pet.description}. Por favor, entre em contato se tiver informações.`,
+      };
+    default:
+      return {
+        title: `Encontrei um ${species}`,
+        content: `Encontrei um ${species} ${pet.breed} na região de ${pet.location}. ${pet.description}. Por favor, entre em contato se for seu pet.`,
+      };
+  }
+}
+
+export const SEED_PETS = [
+  {
+    name: 'Rex',
+    type: 'DOG',
+    breed: 'Labrador',
+    age: '2',
+    gender: PetGender.MALE,
+    size: PetSize.MEDIUM,
+    description: 'Cachorro muito dócil e brincalhão',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Savassi',
+    image: unsplash('1518717758536-85ae29035b6d'),
+  },
+  {
+    name: 'Thor',
+    type: 'DOG',
+    breed: 'Border Collie',
+    age: '3',
+    gender: PetGender.MALE,
+    size: PetSize.MEDIUM,
+    description: 'Cachorro muito inteligente e leal',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Pampulha',
+    image: unsplash('1587300003388-59208cc962cb'),
+  },
+  {
+    name: 'Bella',
+    type: 'DOG',
+    breed: 'Golden Retriever',
+    age: '1',
+    gender: PetGender.FEMALE,
+    size: PetSize.MEDIUM,
+    description: 'Cachorra muito carinhosa e brincalhona',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Lourdes',
+    image: unsplash('1552053831-71594a27632d'),
+  },
+  {
+    name: 'Max',
+    type: 'DOG',
+    breed: 'Pug',
+    age: '2',
+    gender: PetGender.MALE,
+    size: PetSize.SMALL,
+    description: 'Cachorro muito tranquilo e amigável',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Funcionários',
+    image: unsplash('1517849845537-4d257902454a'),
+  },
+  {
+    name: 'Luna',
+    type: 'CAT',
+    breed: 'SRD frajola',
+    age: '1',
+    gender: PetGender.FEMALE,
+    size: PetSize.SMALL,
+    description: 'Gata muito carinhosa e independente',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Santa Tereza',
+    image: unsplash('1514888286974-6c03e2ca1dba'),
+  },
+  {
+    name: 'Milo',
+    type: 'CAT',
+    breed: 'Persa',
+    age: '2',
+    gender: PetGender.MALE,
+    size: PetSize.SMALL,
+    description: 'Gato muito tranquilo e elegante',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Sion',
+    image: unsplash('1596854407944-bf87f6fdd49e'),
+  },
+  {
+    name: 'Nina',
+    type: 'CAT',
+    breed: 'Maine Coon',
+    age: '1',
+    gender: PetGender.FEMALE,
+    size: PetSize.MEDIUM,
+    description: 'Gata muito sociável e brincalhona',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Buritis',
+    image: unsplash('1573865526739-10659fec78a5'),
+  },
+  {
+    name: 'Oliver',
+    type: 'CAT',
+    breed: 'SRD',
+    age: '2',
+    gender: PetGender.MALE,
+    size: PetSize.MEDIUM,
+    description: 'Gato muito dócil e carinhoso',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Centro',
+    image: unsplash('1513360371669-4adf3dd7dff8'),
+  },
+  {
+    name: 'Rocky',
+    type: 'DOG',
+    breed: 'SRD',
+    age: '2',
+    gender: PetGender.MALE,
+    size: PetSize.MEDIUM,
+    description: 'Cachorro muito protetor e leal',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Castelo',
+    image: unsplash('1477884213360-7e9d7dcc1e48'),
+  },
+  {
+    name: 'Lola',
+    type: 'DOG',
+    breed: 'Bulldog Francês',
+    age: '1',
+    gender: PetGender.FEMALE,
+    size: PetSize.SMALL,
+    description: 'Cachorra muito inteligente e brincalhona',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Savassi',
+    image: unsplash('1583337130417-3346a1be7dee'),
+  },
+  {
+    name: 'Zeus',
+    type: 'DOG',
+    breed: 'SRD caramelo',
+    age: '2',
+    gender: PetGender.MALE,
+    size: PetSize.MEDIUM,
+    description: 'Cachorro muito energético e amigável',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Cidade Nova',
+    image: unsplash('1530281700549-e82e7bf110d6'),
+  },
+  {
+    name: 'Daisy',
+    type: 'DOG',
+    breed: 'Beagle',
+    age: '1',
+    gender: PetGender.FEMALE,
+    size: PetSize.SMALL,
+    description: 'Cachorra muito curiosa e brincalhona',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Pampulha',
+    image: unsplash('1543466835-00a7907e9de1'),
+  },
+  {
+    name: 'Simba',
+    type: 'CAT',
+    breed: 'SRD tigrado',
+    age: '1',
+    gender: PetGender.MALE,
+    size: PetSize.MEDIUM,
+    description: 'Gato muito ativo e brincalhão',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Lourdes',
+    image: unsplash('1592194996308-7b43878e84a6'),
+  },
+  {
+    name: 'Lily',
+    type: 'CAT',
+    breed: 'SRD',
+    age: '1',
+    gender: PetGender.FEMALE,
+    size: PetSize.SMALL,
+    description: 'Gata filhote, carinhosa e sociável',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Funcionários',
+    image: unsplash('1574158622682-e40e69881006'),
+  },
+  {
+    name: 'Charlie',
+    type: 'CAT',
+    breed: 'SRD laranja',
+    age: '1',
+    gender: PetGender.MALE,
+    size: PetSize.SMALL,
+    description: 'Gato muito fofo e brincalhão',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Buritis',
+    image: unsplash('1526336024174-e58f5cdd8e13'),
+  },
+  {
+    name: 'Mia',
+    type: 'CAT',
+    breed: 'SRD',
+    age: '2',
+    gender: PetGender.FEMALE,
+    size: PetSize.SMALL,
+    description: 'Gata muito inteligente e ativa',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Sion',
+    image: unsplash('1495360010541-f48722b34f7d'),
+  },
+  {
+    name: 'Apollo',
+    type: 'DOG',
+    breed: 'Corgi',
+    age: '2',
+    gender: PetGender.MALE,
+    size: PetSize.SMALL,
+    description: 'Cachorro muito inteligente e protetor',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Centro',
+    image: unsplash('1537151625747-768eb6cf92b2'),
+  },
+  {
+    name: 'Ruby',
+    type: 'DOG',
+    breed: 'Jack Russell Terrier',
+    age: '1',
+    gender: PetGender.FEMALE,
+    size: PetSize.SMALL,
+    description: 'Cachorra muito carinhosa e tranquila',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Castelo',
+    image: unsplash('1561037404-61cd46aa615b'),
+  },
+  {
+    name: 'Toby',
+    type: 'CAT',
+    breed: 'SRD tigrado',
+    age: '2',
+    gender: PetGender.MALE,
+    size: PetSize.MEDIUM,
+    description: 'Gato muito tranquilo e observador',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Santa Tereza',
+    image: unsplash('1533738363-b7f9aef128ce'),
+  },
+  {
+    name: 'Sophie',
+    type: 'CAT',
+    breed: 'SRD',
+    age: '1',
+    gender: PetGender.FEMALE,
+    size: PetSize.SMALL,
+    description: 'Gata filhote, curiosa e brincalhona',
+    castrated: true,
+    vaccinated: true,
+    neighborhood: 'Cidade Nova',
+    image: unsplash('1529778873920-4da4926a72c2'),
+  },
+];
